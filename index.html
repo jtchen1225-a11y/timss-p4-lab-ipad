@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-MO">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>P4 TIMSS 思維課數學小實驗 ｜ iPad 協同實驗室</title>
+  <meta name="description" content="聖若瑟教區中學第五校 小學四年級數學思維課「數學小實驗」（TIMSS Lab）iPad 小組共用教學版，突出核心動手操作，對應個人紙本工作紙。">
+  <!-- 樣式庫 -->
+  <link rel="stylesheet" href="css/ipad-layout.css">
+  <link rel="stylesheet" href="css/lab-manipulatives.css">
+  <link rel="stylesheet" href="css/floating-toolbar.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📱</text></svg>">
+</head>
+<body>
+
+  <!-- 頂部導航列 -->
+  <header class="ipad-header">
+    <div class="top-bar-row">
+      <div class="brand-section">
+        <div class="brand-badge">📱</div>
+        <div class="brand-titles">
+          <h1>聖若瑟五校 ｜ 小四數學思維課「數學小實驗」</h1>
+          <p>4人共用1部 iPad ｜ 人手一份紙本工作紙 ｜ 突出核心動手實驗</p>
+        </div>
+      </div>
+
+      <!-- iPad 當前動手角色指針 -->
+      <div class="turn-pill-box">
+        <span>👉 當前動手：</span>
+        <div id="turn-role-display" style="font-weight:bold; color:#1e40af;">🔴 操作員(D) 動手</div>
+      </div>
+    </div>
+
+    <!-- 11 週實驗滑動切換列 -->
+    <nav class="week-nav-bar" id="week-nav-bar"></nav>
+  </header>
+
+  <!-- iPad 主內容區 -->
+  <main class="ipad-stage-wrapper">
+    <!-- 實驗標題與核心問題卡 -->
+    <section class="lab-info-banner" id="lab-title-box"></section>
+
+    <!-- 核心動手操作大舞台 (佔比 80%+) -->
+    <section class="main-stage-card" id="main-stage-container"></section>
+
+    <!-- 📄 紙本工作紙填寫引導欄 (小組看螢幕寫工作紙) -->
+    <section class="worksheet-guide-bar">
+      <div class="guide-header">
+        <h3>📄 個人紙本工作紙 ｜ 課堂填寫即時指南</h3>
+        <span style="font-size:0.8rem; color:#78350f;">小組全員依據 iPad 實測數據填寫各自桌面上的紙本記錄單</span>
+      </div>
+      
+      <div class="guide-steps-grid">
+        <div class="guide-step-item" id="guide-step-1">
+          【工作紙第 1 題】：等待實測中...
+        </div>
+        <div class="guide-step-item" id="guide-step-2">
+          【工作紙第 2 題】：等待實測中...
+        </div>
+      </div>
+
+      <div class="guide-quote-row" id="guide-quote-box">
+        🗣️ 【發言人說理】：請進行實驗操作以獲取結論金句...
+      </div>
+    </section>
+  </main>
+
+  <!-- 獨立懸浮課堂工具箱 (畫筆/雷射筆/退出) -->
+  <div class="floating-toolbox">
+    <!-- 畫筆開啟時展開的子工具列 -->
+    <div class="pen-sub-toolbar" id="pen-sub-menu">
+      <button class="btn-exit-pen" id="btn-exit-pen">❌ 退出畫筆</button>
+      <div class="color-dot" data-color="#ef4444" style="background:#ef4444;" title="紅色"></div>
+      <div class="color-dot" data-color="#2563eb" style="background:#2563eb;" title="藍色"></div>
+      <div class="color-dot" data-color="#f59e0b" style="background:#f59e0b;" title="黃色"></div>
+      <div class="color-dot" data-color="#10b981" style="background:#10b981;" title="綠色"></div>
+      <button class="tool-icon-btn" id="btn-eraser-pen" style="width:34px; height:34px; font-size:0.9rem;" title="橡皮擦">🧽</button>
+      <button class="tool-icon-btn" id="btn-clear-pen" style="width:34px; height:34px; font-size:0.9rem;" title="清除全屏筆跡">🗑️</button>
+    </div>
+
+    <!-- 主懸浮按鈕條 -->
+    <div class="toolbox-main-bar">
+      <button class="tool-icon-btn" id="btn-toggle-pen" title="開啟/關閉黑板批註畫筆">✏️</button>
+      <button class="tool-icon-btn" id="btn-toggle-laser" title="雷射筆紅光指引">🔴</button>
+      <button class="tool-icon-btn" id="btn-toggle-sound" title="切換實驗音效">🔊</button>
+      <button class="tool-icon-btn" id="btn-toggle-fs" title="全螢幕">⛶</button>
+    </div>
+  </div>
+
+  <!-- 白板透明塗鴉層 (畫筆開啟時才攔截事件，關閉時 pointer-events: none 完全穿透) -->
+  <canvas id="whiteboard-canvas"></canvas>
+
+  <!-- 雷射筆光斑 -->
+  <div id="laser-dot"></div>
+
+  <!-- 腳本庫 -->
+  <script src="js/audio.js"></script>
+  <script src="js/pen-tool.js"></script>
+  <script src="js/labs/lab01.js"></script>
+  <script src="js/labs/lab02.js"></script>
+  <script src="js/labs/lab03.js"></script>
+  <script src="js/labs/lab04.js"></script>
+  <script src="js/labs/lab05.js"></script>
+  <script src="js/labs/lab06.js"></script>
+  <script src="js/labs/lab07.js"></script>
+  <script src="js/labs/lab08.js"></script>
+  <script src="js/labs/lab09.js"></script>
+  <script src="js/labs/lab10.js"></script>
+  <script src="js/labs/lab11.js"></script>
+  <script src="js/app-ipad.js"></script>
+</body>
+</html>

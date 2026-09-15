@@ -1,0 +1,362 @@
+/* ==========================================================================
+   ipad-layout.css - iPad 小組共用教學最佳化佈局
+   以突出核心實驗為核心，大觸控區，防誤觸，常駐紙本工作紙填寫引導
+   ========================================================================== */
+
+:root {
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-light: #eff6ff;
+  --bg-app: #f1f5f9;
+  --surface: #ffffff;
+  --border: #cbd5e1;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+
+  --role-op: #dc2626;     /* 操作員 Operator */
+  --role-rec: #d97706;    /* 記錄員 Recorder */
+  --role-pre: #059669;    /* 發言人 Presenter */
+  --role-aud: #7c3aed;    /* 質疑員 Auditor */
+
+  --touch-min-size: 48px;
+  --font-math: "Cambria Math", "Times New Roman", serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+/* ================= 頂部簡明導航列 ================= */
+.ipad-header {
+  background: var(--surface);
+  border-bottom: 2px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.top-bar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  gap: 12px;
+}
+
+.brand-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-badge {
+  background: #2563eb;
+  color: white;
+  font-weight: 900;
+  font-size: 1.1rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brand-titles h1 {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #1e293b;
+  line-height: 1.2;
+}
+
+.brand-titles p {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* iPad 輪流操作指針 (Turn Indicator) */
+.turn-pill-box {
+  background: #f8fafc;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 24px;
+  padding: 4px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.turn-role-tag {
+  padding: 3px 10px;
+  border-radius: 14px;
+  color: white;
+  font-size: 0.75rem;
+  transition: all 0.2s;
+}
+
+/* 11 週實驗分頁按鈕列 (加大觸控按鈕) */
+.week-nav-bar {
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  padding: 6px 12px;
+  gap: 8px;
+  background: #ffffff;
+  border-top: 1px solid #f1f5f9;
+  scrollbar-width: thin;
+}
+
+.week-btn {
+  white-space: nowrap;
+  padding: 8px 16px;
+  min-height: 40px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border-radius: 20px;
+  border: 1.5px solid #e2e8f0;
+  background: #f8fafc;
+  color: #475569;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s;
+}
+
+.week-btn:active {
+  transform: scale(0.96);
+}
+
+.week-btn.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  box-shadow: 0 2px 6px rgba(37,99,235,0.3);
+}
+
+/* ================= 核心操作大舞台 (突出實驗) ================= */
+.ipad-stage-wrapper {
+  flex: 1;
+  max-width: 1280px;
+  width: 100%;
+  margin: 10px auto;
+  padding: 0 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* 實驗資訊提示卡 */
+.lab-info-banner {
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.lab-title-group h2 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lab-meta-row {
+  display: flex;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.badge-tag {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-weight: 700;
+}
+.badge-tag.number { background: #ecfdf5; color: #059669; }
+.badge-tag.mg { background: #eef2ff; color: #4f46e5; }
+.badge-tag.cog { background: #fff7ed; color: #c2410c; }
+
+/* 核心問題探究條 */
+.question-highlight {
+  background: #f0fdf4;
+  border-left: 5px solid #10b981;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #065f46;
+  width: 100%;
+  margin-top: 6px;
+}
+
+/* 核心實驗操作舞台卡片 (佔據主視野 80%+) */
+.main-stage-card {
+  background: white;
+  border: 2px solid #cbd5e1;
+  border-radius: 16px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+  padding: 16px;
+  min-height: 520px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ================= 📄 紙本工作紙填寫引導欄 ================= */
+.worksheet-guide-bar {
+  background: #fffbeb;
+  border: 2px solid #fde68a;
+  border-radius: 14px;
+  padding: 12px 16px;
+  margin-top: 10px;
+  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.1);
+}
+
+.guide-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  border-bottom: 1px dashed #f59e0b;
+  padding-bottom: 6px;
+}
+
+.guide-header h3 {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #92400e;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.guide-steps-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+@media (max-width: 768px) {
+  .guide-steps-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.guide-step-item {
+  background: white;
+  border: 1px solid #fef3c7;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  color: #451a03;
+}
+
+.guide-step-item strong {
+  color: #b45309;
+}
+
+.guide-live-data {
+  font-weight: 800;
+  color: #1e40af;
+  font-family: var(--font-math);
+  background: #eff6ff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+/* 說理金句亮點條 */
+.guide-quote-row {
+  margin-top: 8px;
+  background: #ecfdf5;
+  border: 1.5px solid #a7f3d0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  color: #065f46;
+  line-height: 1.4;
+}
+
+/* ================= 觸控友善大按鈕與滑桿 ================= */
+.touch-btn {
+  min-height: var(--touch-min-size);
+  padding: 8px 18px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border-radius: 10px;
+  border: 1.5px solid #cbd5e1;
+  background: white;
+  color: #1e293b;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.1s;
+  touch-action: manipulation;
+}
+
+.touch-btn:active {
+  transform: scale(0.96);
+  background: #f1f5f9;
+}
+
+.touch-btn.primary {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+.touch-btn.primary:active {
+  background: var(--primary-hover);
+}
+
+.touch-btn.danger {
+  background: #ef4444;
+  color: white;
+  border-color: #ef4444;
+}
+
+.touch-btn.success {
+  background: #10b981;
+  color: white;
+  border-color: #10b981;
+}
+
+.touch-btn.warning {
+  background: #f59e0b;
+  color: white;
+  border-color: #f59e0b;
+}
+
+/* 大尺寸滑桿 */
+.touch-slider {
+  width: 160px;
+  height: 28px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
