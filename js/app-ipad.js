@@ -1,4 +1,4 @@
-﻿/**
+/**
  * app-ipad.js - iPad 專屬教學控制器
  * 專為 1 部 iPad + 紙本工作紙課堂打造
  * 支援每週實驗開放進度控制（最多開放 2 個實驗）
@@ -178,7 +178,6 @@ class TimssIpadApp {
   renderHeader() {
     const lab = this.currentLab;
     const titleArea = document.getElementById('lab-title-box');
-    const roleTag = document.getElementById('turn-role-display');
 
     if (titleArea) {
       titleArea.innerHTML = `
@@ -196,16 +195,11 @@ class TimssIpadApp {
         </div>
       `;
     }
-
-    if (roleTag) {
-      roleTag.innerHTML = `<span>${lab.activeRole}</span>`;
-    }
   }
 
   renderHeaderLocked() {
     const lab = this.currentLab;
     const titleArea = document.getElementById('lab-title-box');
-    const roleTag = document.getElementById('turn-role-display');
 
     if (titleArea) {
       titleArea.innerHTML = `
@@ -221,10 +215,6 @@ class TimssIpadApp {
           ⏳ <strong>課堂進度引導：</strong>此實驗尚未開放學生操作，請等待老師統一步調！
         </div>
       `;
-    }
-
-    if (roleTag) {
-      roleTag.innerHTML = `<span style="color:#94a3b8;">🔒 暫未開放</span>`;
     }
   }
 
