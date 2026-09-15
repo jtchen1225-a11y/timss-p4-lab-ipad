@@ -23,10 +23,15 @@
         </div>
       </div>
 
-      <!-- iPad 當前動手角色指針 -->
-      <div class="turn-pill-box">
-        <span>👉 當前動手：</span>
-        <div id="turn-role-display" style="font-weight:bold; color:#1e40af;">🔴 操作員(D) 動手</div>
+      <!-- 頂部操作按鈕組：動手角色與教師進度控制 -->
+      <div class="top-actions-group">
+        <div class="turn-pill-box">
+          <span>👉 當前動手：</span>
+          <div id="turn-role-display" style="font-weight:bold; color:#1e40af;">🔴 操作員(D) 動手</div>
+        </div>
+        <button class="btn-teacher-panel" id="btn-open-teacher-modal" title="教師課堂實驗開放管理 (PIN: 8888)">
+          ⚙️ 課堂進度控制
+        </button>
       </div>
     </div>
 
@@ -101,7 +106,111 @@
   <!-- 雷射筆光斑 -->
   <div id="laser-dot"></div>
 
+  <!-- 🔐 教師 PIN 密碼驗證彈窗 -->
+  <div class="modal-backdrop" id="teacher-pin-modal" style="display: none;">
+    <div class="modal-card modal-pin-card">
+      <div class="modal-header">
+        <h3>🔐 教師課堂管理身分驗證</h3>
+        <button class="modal-close-btn" id="btn-close-pin-modal">✖</button>
+      </div>
+      <div class="modal-body">
+        <p style="color:#64748b; font-size:0.9rem; margin-bottom:12px;">
+          請輸入教師管理密碼進入實驗開放設定（預設：<strong>8888</strong>）：
+        </p>
+        <div style="display:flex; gap:10px; justify-content:center; margin-bottom:12px;">
+          <input type="password" id="input-teacher-pin" maxlength="6" placeholder="輸入 PIN" class="pin-input">
+          <button class="touch-btn primary" id="btn-submit-pin" style="min-height:44px; padding:0 20px;">進入 ➔</button>
+        </div>
+        <div id="pin-error-msg" style="color:#ef4444; font-size:0.85rem; font-weight:bold; display:none; text-align:center;">
+          ❌ PIN 碼錯誤，請重新輸入（預設 8888）
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⚙️ 教師課堂實驗開放管理控制台 -->
+  <div class="modal-backdrop" id="teacher-manage-modal" style="display: none;">
+    <div class="modal-card modal-manage-card">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:1.3rem;">⚙️</span>
+          <div>
+            <h3>課堂實驗開放進度控制</h3>
+            <span style="font-size:0.75rem; color:#64748b;">按教學進度手動開放 ｜ 建議每週開放 1~2 個實驗</span>
+          </div>
+        </div>
+        <button class="modal-close-btn" id="btn-close-manage-modal">✖</button>
+      </div>
+
+      <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+        <!-- 快捷進度切換列 -->
+        <div class="manage-presets-bar">
+          <span style="font-weight:bold; font-size:0.85rem; color:#475569;">🚀 快速進度切換：</span>
+          <div class="preset-btn-group">
+            <button class="preset-pill" data-weeks="W01,W02">第 1、2 週</button>
+            <button class="preset-pill" data-weeks="W03,W04">第 3、4 週</button>
+            <button class="preset-pill" data-weeks="W05,W06">第 5、6 週</button>
+            <button class="preset-pill" data-weeks="W07,W08">第 7、8 週</button>
+            <button class="preset-pill" data-weeks="W09,W10">第 9、10 週</button>
+            <button class="preset-pill" data-weeks="W11">第 11 週</button>
+            <button class="preset-pill all-open" data-weeks="all">全部解鎖 (備課)</button>
+          </div>
+        </div>
+
+        <!-- 11 週勾選清單 -->
+        <div class="labs-checklist-container" id="labs-checklist-area">
+          <!-- 由 JS 動態生成 11 週實驗核取方塊 -->
+        </div>
+
+        <!-- 當前狀態提示 -->
+        <div class="manage-status-bar">
+          <div>
+            已選中 <strong id="selected-labs-count" style="color:#2563eb; font-size:1.1rem;">2</strong> 個實驗 
+            <span id="selected-warning-hint" style="color:#d97706; font-size:0.85rem; margin-left:6px; display:none;">⚠️ 建議每週最多開放 2 個</span>
+          </div>
+          <div style="font-size:0.8rem; color:#64748b;">
+            未勾選的實驗將對學生顯示 🔒 鎖定狀態
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="touch-btn" id="btn-copy-student-url">📋 複製學生網址</button>
+          <button class="touch-btn" id="btn-show-qr-code">📱 大螢幕 QR 碼</button>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="touch-btn" id="btn-cancel-manage">取消</button>
+          <button class="touch-btn primary" id="btn-save-manage">💾 儲存並在當前生效</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📱 大螢幕 QR Code 投影彈窗 -->
+  <div class="modal-backdrop" id="qrcode-modal" style="display: none;">
+    <div class="modal-card modal-qr-card">
+      <div class="modal-header">
+        <h3>📱 學生 iPad 掃碼同步進度</h3>
+        <button class="modal-close-btn" id="btn-close-qr-modal">✖</button>
+      </div>
+      <div class="modal-body" style="text-align:center; padding:18px 10px;">
+        <p style="font-size:0.95rem; color:#334155; margin-bottom:12px;">
+          請讓學生使用 iPad 相機掃描以下二維碼，自動進入當週開放實驗：
+        </p>
+        <div id="qrcode-img-box" style="display:flex; justify-content:center; margin-bottom:12px;">
+          <!-- 動態載入 QR Code -->
+        </div>
+        <div class="qr-target-url-box" id="qr-target-url-text"></div>
+        <div style="margin-top:14px;">
+          <button class="touch-btn primary" id="btn-copy-qr-url">📋 複製此網址</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- 腳本庫 -->
+  <script src="js/config.js"></script>
   <script src="js/audio.js"></script>
   <script src="js/pen-tool.js"></script>
   <script src="js/labs/lab01.js"></script>

@@ -90,6 +90,36 @@ body {
   color: var(--text-muted);
 }
 
+/* 頂部操作群組與教師控制按鈕 */
+.top-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-teacher-panel {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 13px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #334155;
+  background: #f1f5f9;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-teacher-panel:hover, .btn-teacher-panel:active {
+  background: #e2e8f0;
+  color: #0f172a;
+  border-color: #94a3b8;
+  transform: translateY(-1px);
+}
+
 /* iPad 輪流操作指針 (Turn Indicator) */
 .turn-pill-box {
   background: #f8fafc;
@@ -149,6 +179,27 @@ body {
   color: white;
   border-color: var(--primary);
   box-shadow: 0 2px 6px rgba(37,99,235,0.3);
+}
+
+.week-btn.locked {
+  background: #f1f5f9;
+  color: #94a3b8;
+  border-color: #e2e8f0;
+  opacity: 0.75;
+}
+
+.week-btn.locked:hover {
+  background: #e2e8f0;
+  color: #64748b;
+}
+
+.week-btn.locked .lock-badge {
+  font-size: 0.72rem;
+  background: #e2e8f0;
+  color: #64748b;
+  padding: 1px 5px;
+  border-radius: 6px;
+  margin-left: 2px;
 }
 
 /* ================= 核心操作大舞台 (突出實驗) ================= */
@@ -398,4 +449,325 @@ body {
   height: 28px;
   accent-color: var(--primary);
   cursor: pointer;
+}
+
+/* ================= 彈窗遮罩與模態框樣式 ================= */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-card {
+  background: white;
+  border-radius: 18px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.25);
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: modalPop 0.2s ease-out;
+}
+
+@keyframes modalPop {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.modal-pin-card {
+  max-width: 440px;
+}
+
+.modal-manage-card {
+  max-width: 720px;
+}
+
+.modal-qr-card {
+  max-width: 480px;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background: #f8fafc;
+  border-bottom: 1.5px solid #e2e8f0;
+}
+
+.modal-header h3 {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #94a3b8;
+  padding: 4px 8px;
+  border-radius: 6px;
+  line-height: 1;
+}
+
+.modal-close-btn:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.modal-body {
+  padding: 18px 20px;
+}
+
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: #f8fafc;
+  border-top: 1.5px solid #e2e8f0;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pin-input {
+  font-size: 1.4rem;
+  letter-spacing: 6px;
+  text-align: center;
+  padding: 8px 16px;
+  border-radius: 12px;
+  border: 2px solid #cbd5e1;
+  width: 160px;
+  outline: none;
+  font-weight: 800;
+}
+
+.pin-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+}
+
+/* 快速切換進度按鈕列 */
+.manage-presets-bar {
+  margin-bottom: 14px;
+  background: #f8fafc;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.preset-btn-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.preset-pill {
+  border: 1.5px solid #cbd5e1;
+  background: white;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.preset-pill:hover, .preset-pill:active {
+  background: #eff6ff;
+  border-color: #3b82f6;
+  color: #1d4ed8;
+}
+
+.preset-pill.all-open {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #b91c1c;
+}
+
+/* 11 週核取清單網格 */
+.labs-checklist-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+@media (max-width: 640px) {
+  .labs-checklist-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+.lab-check-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: 1.5px solid #e2e8f0;
+  background: white;
+  cursor: pointer;
+  transition: all 0.15s;
+  user-select: none;
+}
+
+.lab-check-item:hover {
+  border-color: #93c5fd;
+  background: #f8fafc;
+}
+
+.lab-check-item.checked {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.lab-check-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #2563eb;
+  cursor: pointer;
+}
+
+.lab-check-info {
+  flex: 1;
+}
+
+.lab-check-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.lab-check-meta {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.manage-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: #f1f5f9;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+/* ================= 🔒 課堂進度鎖定大卡片 ================= */
+.lab-locked-screen {
+  padding: 40px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 420px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 16px;
+}
+
+.locked-card {
+  max-width: 520px;
+  width: 100%;
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 32px 24px;
+  text-align: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.locked-icon-anim {
+  font-size: 3.5rem;
+  margin-bottom: 8px;
+  animation: lockPulse 2s infinite ease-in-out;
+}
+
+@keyframes lockPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+.locked-badge {
+  display: inline-block;
+  background: #fee2e2;
+  color: #b91c1c;
+  font-weight: 800;
+  font-size: 0.8rem;
+  padding: 3px 12px;
+  border-radius: 20px;
+  margin-bottom: 12px;
+}
+
+.locked-card h2 {
+  font-size: 1.35rem;
+  color: #1e293b;
+  margin-bottom: 6px;
+}
+
+.locked-sub {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-bottom: 16px;
+}
+
+.locked-msg-box {
+  background: #fffbeb;
+  border: 1.5px solid #fde68a;
+  border-radius: 12px;
+  padding: 14px 18px;
+  font-size: 0.95rem;
+  color: #92400e;
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+.locked-actions-row {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+.touch-btn.text-link {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-size: 0.85rem;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 6px 12px;
+}
+
+.touch-btn.text-link:hover {
+  color: #1e40af;
+}
+
+.qr-target-url-box {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: #2563eb;
+  word-break: break-all;
+  user-select: all;
 }
