@@ -13,6 +13,7 @@ class TimssIpadApp {
     this.setupNavigation();
     this.setupFloatingToolbar();
     this.setupKeyboard();
+    this.setupSummaryToggle();
 
     // 啟動畫筆模組
     if (window.penTool) {
@@ -63,6 +64,9 @@ class TimssIpadApp {
     this.currentLab = window.TIMSS_LABS[labId];
     window.location.hash = labId;
 
+    // 每次切換實驗，教師最後的總結預設摺合
+    this.collapseSummary();
+
     // 更新分頁狀態
     document.querySelectorAll('.week-btn').forEach(btn => {
       if (btn.getAttribute('data-lab') === labId) {
@@ -111,15 +115,58 @@ class TimssIpadApp {
     }
   }
 
-  // 更新下方紙本工作紙引導
-  updateWorksheetGuide(guide) {
-    const step1El = document.getElementById('guide-step-1');
-    const step2El = document.getElementById('guide-step-2');
-    const quoteEl = document.getElementById('guide-quote-box');
+  setupSummaryToggle() {
+    const btn = document.getElementById('summary-toggle-btn');
+    const content = document.getElementById('summary-collapse-content');
+    const arrowText = document.getElementById('summary-arrow-text');
+    const arrowIcon = document.getElementById('summary-arrow-icon');
+    if (!btn || !content) return;
 
-    if (step1El) step1El.innerHTML = guide.step1;
-    if (step2El) step2El.innerHTML = guide.step2;
-    if (quoteEl) quoteEl.innerHTML = guide.quote;
+    btn.addEventListener('click', () => {
+      const isHidden = content.style.display === 'none' || getComputedStyle(content).display === 'none';
+      if (isHidden) {
+        content.style.display = 'block';
+        if (arrowText) arrowText.innerText = '點擊摺合總結';
+        if (arrowIcon) arrowIcon.innerText = '▲';
+      } else {
+        content.style.display = 'none';
+        if (arrowText) arrowText.innerText = '點擊展開總結';
+        if (arrowIcon) arrowIcon.innerText = '▼';
+      }
+      if (window.soundFx) window.soundFx.click();
+    });
+  }
+
+  collapseSummary() {
+    const content = document.getElementById('summary-collapse-content');
+    const arrowText = document.getElementById('summary-arrow-text');
+    const arrowIcon = document.getElementById('summary-arrow-icon');
+    if (content) content.style.display = 'none';
+    if (arrowText) arrowText.innerText = '點擊展開總結';
+    if (arrowIcon) arrowIcon.innerText = '▼';
+  }
+
+  // 更新下方教師最後的總結內容
+  updateTeacherSummary(summary) {
+    if (!summary) return;
+    const coreEl = document.getElementById('summary-core-point');
+    const formulaEl = document.getElementById('summary-formula-point');
+    const quoteEl = document.getElementById('summary-quote-text');
+
+    if (coreEl && summary.core) {
+      coreEl.innerHTML = summary.core;
+    }
+    if (formulaEl && summary.formula) {
+      formulaEl.innerHTML = summary.formula;
+    }
+    if (quoteEl && summary.quote) {
+      quoteEl.innerHTML = summary.quote;
+    }
+  }
+
+  // 保留相容別名
+  updateWorksheetGuide(guide) {
+    this.updateTeacherSummary(guide);
   }
 
   setupFloatingToolbar() {

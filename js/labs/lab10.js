@@ -20,11 +20,11 @@ window.TIMSS_LABS['W10'] = {
     step: 0
   },
 
-  getWorksheetGuide() {
+  getTeacherSummary() {
     return {
-      step1: `【工作紙第 1 題】：加法補償：放 100g 比放 99g <strong>多放了 1g</strong>，天平向右偏重，補救方法是同側 <strong>拿走 1g (− 1)</strong>。算式：<strong>348 + 100 − 1 ＝ 447</strong>。`,
-      step2: `【工作紙第 2 題】：減法補償：拿走 200g 等於 <strong>多扣了 2g</strong>，天平左側翹起，補救方法是同側 <strong>補回 2g (＋ 2)</strong>。算式：<strong>523 − 200 ＋ 2 ＝ 325</strong>。`,
-      quote: `🗣️ 【發言人說理】：我們組在天平上做魔術：多減了 200g，天平歪了，必須在同側補回 2g 才能水平歸零！所以 523 − 198 必須寫成 523 − 200 + 2！口訣：多加要減，多減要加！`
+      core: `<h4>💡 核心概念提煉</h4><p>湊整速算的核心是「<strong>等量平衡與補償原理</strong>」。將接近整百的數轉化為整百數運算，極大降低了心算難度，但破壞了原有數值平衡。在同側進行逆向補償：若多加了整百，天平偏重，同側必須減去差額（<strong>多加要減</strong>）；若多減了整百，天平失重翹起，同側必須加回差額（<strong>多減要加</strong>）。</p>`,
+      formula: `<h4>📐 核心代數變換與補償模型</h4><p>• <strong>加法湊整（多加要減）：</strong>$348 + 99 = 348 + (100 - 1) = 348 + 100 - 1 = \\mathbf{447}$<br>• <strong>減法湊整（多減要加）：</strong>$523 - 198 = 523 - (200 - 2) = 523 - 200 + 2 = \\mathbf{325}$<br>• <strong>代數本質：</strong>括號前是減號，去括號時括號內減號變加號（負負得正）。</p>`,
+      quote: `🎯 <strong>教師總結金句：</strong>「湊整速算天平平，多加要減保平衡；多減要加莫記反，去括號變號見神奇！」`
     };
   },
 
@@ -158,7 +158,7 @@ window.TIMSS_LABS['W10'] = {
     }
 
     if (window.ipadApp) {
-      window.ipadApp.updateWorksheetGuide(this.getWorksheetGuide());
+      window.ipadApp.updateTeacherSummary(this.getTeacherSummary());
     }
   },
 

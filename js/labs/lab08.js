@@ -23,11 +23,11 @@ window.TIMSS_LABS['W08'] = {
     ]
   },
 
-  getWorksheetGuide() {
+  getTeacherSummary() {
     return {
-      step1: `【工作紙第 1 題】：實測面積：長蛇形 <strong>6 格 (24 cm²)</strong>；2×3 長方形 <strong>6 格</strong>；L 形怪獸 <strong>6 格</strong>。結論：<strong>面積守恆不變</strong>。`,
-      step2: `【工作紙第 2 題】：實測周界：長蛇形 <strong>14 單位 (28 cm)</strong>；2×3 長方形 <strong>10 單位 (20 cm)</strong>；L 形 <strong>12 單位 (24 cm)</strong>。`,
-      quote: `🗣️ 【發言人說理】：我們組實測三種拼法：面積全是 6 塊（守恆不變）！但長條形周界最長是 14 單位，緊湊形周界最短是 10 單位。說明面積相同，周界可以完全不同！邊貼合越多，藏進肚子裡的邊越多，周界越短！`
+      core: `<h4>💡 核心概念提煉</h4><p>幾何拼擺中存在「<strong>面積守恆定律</strong>」：只要方塊總數不變（6 個方格），無論擺成一字長蛇、緊湊矩形還是 L 形，面積恆為 6 單位。但<strong>周界絕不守恆</strong>！兩個方塊每拼接一條邊，就會有 2 條邊被「吞進內部」不再計入周界。拼擺越緊湊、重合接縫越多，外圍周界就越短！</p>`,
+      formula: `<h4>📐 核心計算與邊長折損模型</h4><p>• <strong>原始邊長總數：</strong>$6 \\times 4 = 24$ 條邊<br>• <strong>一字長條（重合 5 縫）：</strong>$C = 24 - (5 \\times 2) = \\mathbf{14\\text{ 單位}}$（最長周界）<br>• <strong>2×3 矩形（重合 7 縫）：</strong>$C = 24 - (7 \\times 2) = \\mathbf{10\\text{ 單位}}$（最短周界）<br>• <strong>面積結論：</strong>$S \\equiv 6\\text{ 格}$（面積相同，周界可以截然不同！）</p>`,
+      quote: `🎯 <strong>教師總結金句：</strong>「拼塊不增面積同，形狀千變周界殊；內部貼合吞邊線，越緊湊者周越短！」`
     };
   },
 
@@ -168,7 +168,7 @@ window.TIMSS_LABS['W08'] = {
     }
 
     if (window.ipadApp) {
-      window.ipadApp.updateWorksheetGuide(this.getWorksheetGuide());
+      window.ipadApp.updateTeacherSummary(this.getTeacherSummary());
     }
   },
 

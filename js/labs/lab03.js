@@ -23,11 +23,11 @@ window.TIMSS_LABS['W03'] = {
     origamiStep: 0
   },
 
-  getWorksheetGuide() {
+  getTeacherSummary() {
     return {
-      step1: `【工作紙第 1 題】：雙尺滑動繪出的斜線：左端垂直距離 <strong>4.5 cm</strong>、中間 <strong>4.5 cm</strong>、右端 <strong>4.5 cm</strong>。結論：<strong>處處等距，兩線互相平行 (∥)</strong>。`,
-      step2: `【工作紙第 2 題】：折紙實驗：兩次對折展開後，兩條折痕互相 <strong>垂直 (⊥)</strong>，夾角測量為 <strong>90° (直角)</strong>。`,
-      quote: `🗣️ 【發言人說理】：我們組用雙尺滑動法畫出斜線，實測左、中、右三處垂直寬度都是 4.5 cm！處處等距，永不相交，所以百分之百是平行線！平行只看距離是否處處相等，與線條斜不斜無關！`
+      core: `<h4>💡 核心概念提煉</h4><p><strong>平行（∥）</strong>的本質特徵是：同一平面內兩直線之間的垂直距離<strong>處處相等</strong>，向兩端無限延伸永不相交。無論線條是水平、豎直還是傾斜，只要間距固定就是平行！<strong>垂直（⊥）</strong>的本質特徵是兩線相交夾角為 <strong>90°（直角）</strong>，折紙利用平角 180° 對折平分即可得到標準直角。</p>`,
+      formula: `<h4>📐 核心幾何判定與定理</h4><p>• <strong>平行判定：</strong>左、中、右垂直間距 $d_1 = d_2 = d_3 = 4.5\\text{ cm}$（處處等距）$\\implies L_1 \\parallel L_2$<br>• <strong>垂直判定：</strong>平角 $180^\\circ$ 經二次對折均分 $\\implies$ 夾角為 $90^\\circ \\implies L_1 \\perp L_2$</p>`,
+      quote: `🎯 <strong>教師總結金句：</strong>「平不平行看距離，處處等距即平行，斜著也是平行線；兩次對折分平角，九十度角定垂直！」`
     };
   },
 
@@ -229,7 +229,7 @@ window.TIMSS_LABS['W03'] = {
 
   update() {
     if (window.ipadApp) {
-      window.ipadApp.updateWorksheetGuide(this.getWorksheetGuide());
+      window.ipadApp.updateTeacherSummary(this.getTeacherSummary());
     }
   },
 

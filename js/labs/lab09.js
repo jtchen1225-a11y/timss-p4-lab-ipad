@@ -22,11 +22,11 @@ window.TIMSS_LABS['W09'] = {
     w4: 354
   },
 
-  getWorksheetGuide() {
+  getTeacherSummary() {
     return {
-      step1: `【工作紙第 1 題】：容量換算：0.8 L ＝ <strong>800 ml</strong>；0.08 L ＝ <strong>80 ml</strong>；0.7 L ＝ <strong>700 ml</strong>；0.354 L ＝ <strong>354 ml</strong>。`,
-      step2: `【工作紙第 2 題】：從小到大升序排序：<strong>0.08 L (80ml) ＜ 0.354 L (354ml) ＜ 0.7 L (700ml) ＜ 0.8 L (800ml)</strong>。`,
-      quote: `🗣️ 【發言人說理】：我們組實測注水：0.8 L 倒了 800ml，0.08 L 只有 80ml，兩者差了整整 10 倍！0.7 L 倒了 700ml，遠大於 0.354 L 的 354ml。小數位數多不代表容量大，先看十分位！`
+      core: `<h4>💡 核心概念提煉</h4><p>小數大小比較絕不能受整數思維誤導去「數數位長短」！比較小數必須遵循「<strong>從最高位向最低位逐位比較</strong>」的法則。在容量單位中 $1\\text{ L} = 1000\\text{ ml}$，十分位上的 1 代表 $100\\text{ ml}$，百分位上的 1 代表 $10\\text{ ml}$。$0.7\\text{ L}$（700ml）雖然只有 1 位小數，卻遠大於 3 位小數但十分位只有 3 的 $0.354\\text{ L}$（354ml）！</p>`,
+      formula: `<h4>📐 核心容量換算與位值排序</h4><p>• <strong>基準換算：</strong>$1\\text{ L} = 1000\\text{ ml}$ ｜ $0.1\\text{ L} = 100\\text{ ml}$ ｜ $0.01\\text{ L} = 10\\text{ ml}$<br>• <strong>量杯實測：</strong>$0.8\\text{ L}=800\\text{ ml}$ ＞ $0.7\\text{ L}=700\\text{ ml}$ ＞ $0.354\\text{ L}=354\\text{ ml}$ ＞ $0.08\\text{ L}=80\\text{ ml}$<br>• <strong>大小排序：</strong>$\\mathbf{0.8\\text{ L} > 0.7\\text{ L} > 0.354\\text{ L} > 0.08\\text{ L}}$</p>`,
+      quote: `🎯 <strong>教師總結金句：</strong>「小數比較莫數長，高位排起見真章；十分數位定乾坤，長度再長莫被蒙！」`
     };
   },
 
@@ -165,7 +165,7 @@ window.TIMSS_LABS['W09'] = {
     if (l4) l4.style.height = `${(d / 1000) * 100}%`;
 
     if (window.ipadApp) {
-      window.ipadApp.updateWorksheetGuide(this.getWorksheetGuide());
+      window.ipadApp.updateTeacherSummary(this.getTeacherSummary());
     }
   },
 

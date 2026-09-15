@@ -21,13 +21,13 @@ window.TIMSS_LABS['W11'] = {
     smashed: false
   },
 
-  getWorksheetGuide() {
+  getTeacherSummary() {
     const a = this.parse(this.state.fA);
     const b = this.parse(this.state.fB);
     return {
-      step1: `【工作紙第 1 題】：反例選手 A (長 ${a.L} 寬 ${a.W})：周界 <strong>${a.P} cm</strong>，面積 <strong>${a.A} cm²</strong>。`,
-      step2: `【工作紙第 2 題】：反例選手 B (長 ${b.L} 寬 ${b.W})：周界 <strong>${b.P} cm</strong>，面積 <strong>${b.A} cm²</strong>。結論：<strong>${a.P}cm ＝ ${b.P}cm，但 ${a.A} ≠ ${b.A}</strong>！`,
-      quote: `🗣️ 【發言人說理】：我們組成功攻破小明戰書！反例證據：長 7 寬 1，周界 16cm，面積 7 cm²；長 5 寬 3，周界 16cm，面積 15 cm²。16cm 相同，但 7 ≠ 15！反例成立，戰書粉碎！`
+      core: `<h4>💡 核心概念提煉</h4><p>周界（一維線段長度 cm）與面積（二維平面覆蓋 $\\text{cm}^2$）是本質截然不同的幾何度量。在數學科學論證中，要駁倒一個偽命題「周界相等則面積必相等」，<strong>只需構造出一個反例（反例構造法）</strong>。周界固定時，長寬越懸殊面積越小，長寬越接近面積越大！</p>`,
+      formula: `<h4>📐 核心擂台反例數據</h4><p>• <strong>選手 A（${a.L}×${a.W}）：</strong>周界 $(${a.L}+${a.W})\\times 2 = \\mathbf{${a.P}\\text{ cm}}$ ｜ 面積 $${a.L}\\times${a.W} = \\mathbf{${a.A}\\text{ cm}^2}$<br>• <strong>選手 B（${b.L}×${b.W}）：</strong>周界 $(${b.L}+${b.W})\\times 2 = \\mathbf{${b.P}\\text{ cm}}$ ｜ 面積 $${b.L}\\times${b.W} = \\mathbf{${b.A}\\text{ cm}^2}$<br>• <strong>科學判決：</strong>${a.P}\\text{cm} = ${b.P}\\text{cm}$，但 ${a.A}\\text{cm}^2 \\neq ${b.A}\\text{cm}^2$（反例鐵證如山，偽命題徹底擊碎！）</p>`,
+      quote: `🎯 <strong>教師總結金句：</strong>「周長是一維線長，面積是二維面廣；一個反例破偽命，長寬越近面越大！」`
     };
   },
 
@@ -194,7 +194,7 @@ window.TIMSS_LABS['W11'] = {
     }
 
     if (window.ipadApp) {
-      window.ipadApp.updateWorksheetGuide(this.getWorksheetGuide());
+      window.ipadApp.updateTeacherSummary(this.getTeacherSummary());
     }
   },
 

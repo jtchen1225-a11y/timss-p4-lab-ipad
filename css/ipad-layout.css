@@ -227,79 +227,118 @@ body {
   flex-direction: column;
 }
 
-/* ================= 📄 紙本工作紙填寫引導欄 ================= */
-.worksheet-guide-bar {
-  background: #fffbeb;
-  border: 2px solid #fde68a;
+/* ================= 🎓 教師最後的總結（預設摺合） ================= */
+.teacher-summary-card {
+  background: white;
+  border: 2px solid #cbd5e1;
   border-radius: 14px;
-  padding: 12px 16px;
-  margin-top: 10px;
-  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.1);
+  margin-top: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  overflow: hidden;
+  transition: all 0.2s ease;
 }
 
-.guide-header {
+.summary-toggle-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
-  border-bottom: 1px dashed #f59e0b;
-  padding-bottom: 6px;
+  padding: 12px 18px;
+  cursor: pointer;
+  background: #f8fafc;
+  user-select: none;
+  transition: background 0.15s;
 }
 
-.guide-header h3 {
-  font-size: 0.95rem;
+.summary-toggle-header:hover {
+  background: #f1f5f9;
+}
+
+.summary-title-area {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.summary-icon {
+  font-size: 1.25rem;
+}
+
+.summary-title-area h3 {
+  font-size: 1.05rem;
   font-weight: 800;
-  color: #92400e;
+  color: #1e293b;
+}
+
+.summary-badge {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: #e0e7ff;
+  color: #4338ca;
+  font-weight: 700;
+}
+
+.summary-arrow-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.arrow-icon {
+  display: inline-block;
+  transition: transform 0.2s ease;
+  font-size: 0.8rem;
+}
+
+.summary-body-collapse {
+  padding: 14px 18px;
+  border-top: 1px solid #e2e8f0;
+  background: #fafafa;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.summary-point-box {
+  background: white;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 0.9rem;
+  color: #334155;
+  line-height: 1.5;
+}
+
+.summary-point-box h4 {
+  font-size: 0.92rem;
+  color: #1e293b;
+  margin-bottom: 6px;
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
-.guide-steps-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-@media (max-width: 768px) {
-  .guide-steps-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.guide-step-item {
-  background: white;
-  border: 1px solid #fef3c7;
-  border-radius: 8px;
-  padding: 8px 12px;
-  font-size: 0.85rem;
-  color: #451a03;
-}
-
-.guide-step-item strong {
-  color: #b45309;
-}
-
-.guide-live-data {
-  font-weight: 800;
-  color: #1e40af;
-  font-family: var(--font-math);
-  background: #eff6ff;
-  padding: 2px 6px;
-  border-radius: 4px;
-  display: inline-block;
-}
-
-/* 說理金句亮點條 */
-.guide-quote-row {
-  margin-top: 8px;
+.summary-quote-box {
+  margin-top: 12px;
   background: #ecfdf5;
   border: 1.5px solid #a7f3d0;
-  border-radius: 8px;
-  padding: 8px 12px;
-  font-size: 0.85rem;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 0.92rem;
   color: #065f46;
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
 /* ================= 觸控友善大按鈕與滑桿 ================= */

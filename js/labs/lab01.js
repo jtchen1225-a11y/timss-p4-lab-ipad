@@ -21,14 +21,13 @@ window.TIMSS_LABS['W01'] = {
     zeroGuard: true
   },
 
-  getWorksheetGuide() {
+  getTeacherSummary() {
     const leftTotal = this.state.left1k * 1000;
     const rightTotal = this.state.right10k * 10000;
-    const heavier = leftTotal > rightTotal ? '左盤 (千位)' : (rightTotal > leftTotal ? '右盤 (萬位)' : '兩盤平衡');
     return {
-      step1: `【工作紙第 1 題】：千位放 <strong>${this.state.left1k}</strong> 個 (<strong>${leftTotal.toLocaleString()}g</strong>)；萬位放 <strong>${this.state.right10k}</strong> 個 (<strong>${rightTotal.toLocaleString()}g</strong>)。天平向 <strong>${heavier}</strong> 傾斜！`,
-      step2: `【工作紙第 2 題】：數字 432,100 拆解：<strong>4×100,000 + 3×10,000 + 2×1,000 + 1×100</strong>。萬位 3 (30,000) 遠重於千位 2 (2,000)！`,
-      quote: `🗣️ 【發言人說理】：我們組實測發現：萬位上的 1（10,000g）比千位上的 9（9,000g）更重！因為萬位的計數單位是千位的 10 倍，高位決定大局！0 雖重 0g，但守護數位不坍塌！`
+      core: `<h4>💡 核心概念提煉</h4><p>數字的大小由「<strong>數碼</strong>」與「<strong>位值</strong>」共同決定。萬位的計數單位（10,000）是千位（1,000）的 10 倍，因此萬位 1 比千位 9 還要大。此外，數字中的「0」雖然數值為 0，但在數位中扮演「<strong>佔位守衛</strong>」的關鍵角色，一旦缺失會導致整體數位向右坍塌。</p>`,
+      formula: `<h4>📐 核心算式與位值展開</h4><p>天平實測：萬位 1 個（10,000）＞ 千位 9 個（9,000）。<br>432,100 = <strong>4×100,000 + 3×10,000 + 2×1,000 + 1×100 + 0×10 + 0×1</strong>。<br>萬位 3 代表 30,000，千位 2 代表 2,000，萬位價值遠高於千位。</p>`,
+      quote: `🎯 <strong>教師總結金句：</strong>「數位高一位，價值大十倍；0 號保鏢不可少，位值守護不坍塌！」`
     };
   },
 
@@ -204,9 +203,9 @@ window.TIMSS_LABS['W01'] = {
       }
     }
 
-    // 同步更新下方紙本工作紙引導
+    // 同步更新下方教師最後的總結
     if (window.ipadApp) {
-      window.ipadApp.updateWorksheetGuide(this.getWorksheetGuide());
+      window.ipadApp.updateTeacherSummary(this.getTeacherSummary());
     }
   },
 

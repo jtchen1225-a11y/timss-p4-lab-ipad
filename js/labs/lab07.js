@@ -20,13 +20,13 @@ window.TIMSS_LABS['W07'] = {
     over: 5  // 1/5
   },
 
-  getWorksheetGuide() {
+  getTeacherSummary() {
     const bDeg = (360 / this.state.base).toFixed(1);
     const oDeg = (360 / this.state.over).toFixed(1);
     return {
-      step1: `【工作紙第 1 題】：圓心角實測：1/${this.state.base} 是 <strong>${bDeg}°</strong>；1/${this.state.over} 是 <strong>${oDeg}°</strong>。1/${this.state.base} 比 1/${this.state.over} 多出 <strong>${Math.abs(bDeg - oDeg).toFixed(1)}°</strong>！`,
-      step2: `【工作紙第 2 題】：大小比較：<strong>1/${this.state.base} ＞ 1/${this.state.over}</strong>。分母越大，份數越多，每份越小！`,
-      quote: `🗣️ 【發言人說理】：我們組把 1/5 疊在 1/3 上，親眼看到 1/3 多出了一大塊！量圓心角 1/3 是 120°，1/5 只有 72°。事實證明：分母是平分的人數，分的人越多，每個人吃到的披薩就越小！`
+      core: `<h4>💡 核心概念提煉</h4><p>幾分之一（同分子分數）的本質是「<strong>對同一個整體（單位 1）進行平均分</strong>」。分數中的「<strong>分母</strong>」代表平分的總份數（即分給多少人）。整體總量固定時，平均分的份數越多，每份所能得到的實體份額就越小！</p>`,
+      formula: `<h4>📐 核心圓心角幾何模型與不等式</h4><p>• <strong>圓心角公式：</strong>$\\theta = 360^\\circ \\div \\text{分母}$<br>• <strong>實測數據：</strong>$\\frac{1}{${this.state.base}}$ 扇形角為 <strong>${bDeg}°</strong> ｜ $\\frac{1}{${this.state.over}}$ 扇形角為 <strong>${oDeg}°</strong><br>• <strong>定則：</strong>當分子均為 1 時，分母越小，分數反而越大：$\\mathbf{\\frac{1}{${Math.min(this.state.base, this.state.over)}} > \\frac{1}{${Math.max(this.state.base, this.state.over)}}}$。</p>`,
+      quote: `🎯 <strong>教師總結金句：</strong>「分子同為一，分母看人頭；分給人越多，每塊肉越小；分母越小塊越大！」`
     };
   },
 
@@ -178,7 +178,7 @@ window.TIMSS_LABS['W07'] = {
     }
 
     if (window.ipadApp) {
-      window.ipadApp.updateWorksheetGuide(this.getWorksheetGuide());
+      window.ipadApp.updateTeacherSummary(this.getTeacherSummary());
     }
   },
 

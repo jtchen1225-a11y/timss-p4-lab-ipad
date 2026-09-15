@@ -19,11 +19,11 @@ window.TIMSS_LABS['W05'] = {
     mode: 'forward' // 'forward', 'paren', 'noparen'
   },
 
-  getWorksheetGuide() {
+  getTeacherSummary() {
     return {
-      step1: `【工作紙第 1 題】：購物平衡算式：左盤 <strong>$100</strong> ＝ 右盤 <strong>3 × $15 ($45) ＋ 找回的 $55</strong>。`,
-      step2: `【工作紙第 2 題】：反求單價算式：<strong>(100 − 55) ÷ 3 ＝ 45 ÷ 3 ＝ 15 元</strong>。不加括號會算出 81.7 元（天平倒下！）。`,
-      quote: `🗣️ 【發言人說理】：我們組用天平實測發現：100 元等於花掉的錢加上找回的錢！反求單價時，必須加括號 (100 − 55) ÷ 3，括號就像保險箱，先算出一共花多少再除以本數，否則天平就會倒下！`
+      core: `<h4>💡 核心概念提煉</h4><p>在兩步運算與購物情境中，「<strong>付出總額 = 物品總花費 + 找回零錢</strong>」是恆成立的等量關係。當我們要反求每本書的單價時，必須先求出 3 本書的總花費（100 − 55），再除以本數 3。由於乘除運算級別高於加減，若要打破規則強制先算減法，就必須加上「<strong>小括號保險箱</strong>」！</p>`,
+      formula: `<h4>📐 核心算式與運算順序對比</h4><p>• <strong>購物守恆方程：</strong>$100 = 3 \\times 15 + 55$<br>• <strong>加括號正確求解：</strong>$(100 - 55) \\div 3 = 45 \\div 3 = \\mathbf{15\\text{ 元}}$（平衡）<br>• ❌ <strong>漏括號致命錯誤：</strong>$100 - 55 \\div 3 \\approx 100 - 18.3 = \\mathbf{81.7\\text{ 元}}$（天平崩潰！）</p>`,
+      quote: `🎯 <strong>教師總結金句：</strong>「兩步運算理清序，反求單價先求差；小括號是保險箱，先減後除不走樣！」`
     };
   },
 
@@ -171,7 +171,7 @@ window.TIMSS_LABS['W05'] = {
     }
 
     if (window.ipadApp) {
-      window.ipadApp.updateWorksheetGuide(this.getWorksheetGuide());
+      window.ipadApp.updateTeacherSummary(this.getTeacherSummary());
     }
   },
 

@@ -21,13 +21,13 @@ window.TIMSS_LABS['W02'] = {
     scenario: 'none' // 'none', 'ceil', 'floor'
   },
 
-  getWorksheetGuide() {
+  getTeacherSummary() {
     const q = Math.floor(this.state.total / this.state.perBag);
     const r = this.state.total % this.state.perBag;
     return {
-      step1: `【工作紙第 1 題】：總數 <strong>${this.state.total}</strong> 粒，每袋 <strong>${this.state.perBag}</strong> 粒。裝滿 <strong>${q}</strong> 袋，剩下 <strong>${r}</strong> 粒散糖。`,
-      step2: `【工作紙第 2 題】：情境 A (裝箱/校車) 需要 <strong>${r > 0 ? q + 1 : q}</strong> 袋（進一法）；情境 B (超市整袋) 可賣 <strong>${q}</strong> 袋（去尾法）。`,
-      quote: `🗣️ 【發言人說理】：我們組動手裝了 14 袋，桌上剩 3 粒。如果是搭車裝箱，桌上一粒不能剩，必須進位拿第 15 個袋子；如果是付錢買整袋，半成品不能賣，只能賣 14 袋！`
+      core: `<h4>💡 核心概念提煉</h4><p>帶餘除法中的「<strong>餘數</strong>」具有深刻的現實情境意義。當題目要求「全員乘車/全部裝箱」時，剩餘的物品或人數不能遺棄，必須增加一個載體，採用「<strong>進一法（商+1）</strong>」；當要求「湊滿成套/按整袋售賣」時，不足額的散件無法包裝成整件，採用「<strong>去尾法（保留商）</strong>」。</p>`,
+      formula: `<h4>📐 核心算式與數學模型</h4><p>數學除法模型：<strong>${this.state.total} ÷ ${this.state.perBag} = ${q} …… ${r}</strong><br>• 全納進一法：${q} + 1 = <strong>${q + 1} 個</strong>（生活保護：乘車、租船、裝箱）<br>• 足額去尾法：只能湊成 <strong>${q} 個</strong>（商業買賣：做衣服、賣整盒、買套餐）</p>`,
+      quote: `🎯 <strong>教師總結金句：</strong>「餘數去留看情境，全員裝載進一法，足額售賣去尾法；數學源於生活，生活決定算法！」`
     };
   },
 
@@ -206,9 +206,9 @@ window.TIMSS_LABS['W02'] = {
       verdict.innerHTML = `💡 <strong>點擊上方「情境 A」或「情境 B」按鈕</strong>，觀察餘數 ${r} 在真實生活中的命運抉擇！`;
     }
 
-    // 更新工作紙
+    // 更新教師總結
     if (window.ipadApp) {
-      window.ipadApp.updateWorksheetGuide(this.getWorksheetGuide());
+      window.ipadApp.updateTeacherSummary(this.getTeacherSummary());
     }
   },
 

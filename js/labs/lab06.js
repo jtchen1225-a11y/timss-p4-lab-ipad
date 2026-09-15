@@ -21,16 +21,17 @@ window.TIMSS_LABS['W06'] = {
     mode: 'full' // 'full', 'wall', 'gate', 'wall_gate'
   },
 
-  getWorksheetGuide() {
+  getTeacherSummary() {
     const L = this.state.length;
     const W = this.state.width;
     const full = (L + W) * 2;
     const wallVal = full - L;
     const gateVal = full - 3;
+    const bothVal = full - L - 3;
     return {
-      step1: `【工作紙第 1 題】：四面全圍毛線長度：(<strong>${L} + ${W}</strong>) × 2 ＝ <strong>${full} cm</strong>。`,
-      step2: `【工作紙第 2 題】：長邊靠牆實用毛線：<strong>${full} − ${L} ＝ ${wallVal} cm</strong>；預留 3cm 門實用毛線：<strong>${full} − 3 ＝ ${gateVal} cm</strong>。`,
-      quote: `🗣️ 【發言人說理】：我們組實測圍籬笆：四面全圍剛好用光 40cm 毛線；靠牆一面時，剪掉一條長邊，只要 28 cm；留 3cm 大門時，剪去大門，只要 37 cm！周界是圍繞外圍一週的長度，靠牆處不用圍！`
+      core: `<h4>💡 核心概念提煉</h4><p>周界的數學定義是「<strong>封閉圖形一週邊線的長度總和</strong>」。但在真實籬笆工程中，必須考慮實際邊界條件：現成的牆壁可充當天然屏障（<strong>靠牆邊無需圍籬</strong>），大門是出入通道（<strong>留門處必須扣除</strong>）。動態周界計算體現了數學模型與生活工程的完美結合！</p>`,
+      formula: `<h4>📐 核心工程算式與扣除法</h4><p>• <strong>四面封閉總周界：</strong>$(${L} + ${W}) \\times 2 = \\mathbf{${full}\\text{ cm}}$<br>• <strong>長邊靠牆籬笆長：</strong>${full} − ${L} = \\mathbf{${wallVal}\\text{ cm}}$（節省 1 條長邊）<br>• <strong>開闢 3cm 門籬笆長：</strong>${full} − 3 = \\mathbf{${gateVal}\\text{ cm}}$ ｜ <strong>雙重扣減：</strong>${full} − ${L} − 3 = \\mathbf{${bothVal}\\text{ cm}}$</p>`,
+      quote: `🎯 <strong>教師總結金句：</strong>「周界本是繞一週，靠牆省下一條邊；留門剪出進出路，扣除無須圍線段！」`
     };
   },
 
@@ -201,7 +202,7 @@ window.TIMSS_LABS['W06'] = {
     }
 
     if (window.ipadApp) {
-      window.ipadApp.updateWorksheetGuide(this.getWorksheetGuide());
+      window.ipadApp.updateTeacherSummary(this.getTeacherSummary());
     }
   },
 

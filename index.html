@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>P4 TIMSS 思維課數學小實驗 ｜ iPad 協同實驗室</title>
-  <meta name="description" content="聖若瑟教區中學第五校 小學四年級數學思維課「數學小實驗」（TIMSS Lab）iPad 小組共用教學版，突出核心動手操作，對應個人紙本工作紙。">
+  <title>聖若瑟教區中學第五校中文部小四思維課「數學小實驗」</title>
+  <meta name="description" content="聖若瑟教區中學第五校中文部小四思維課「數學小實驗」（TIMSS Lab）互動操作教學平台。">
   <!-- 樣式庫 -->
   <link rel="stylesheet" href="css/ipad-layout.css">
   <link rel="stylesheet" href="css/lab-manipulatives.css">
@@ -19,8 +19,7 @@
       <div class="brand-section">
         <div class="brand-badge">📱</div>
         <div class="brand-titles">
-          <h1>聖若瑟五校 ｜ 小四數學思維課「數學小實驗」</h1>
-          <p>4人共用1部 iPad ｜ 人手一份紙本工作紙 ｜ 突出核心動手實驗</p>
+          <h1>聖若瑟教區中學第五校中文部小四思維課「數學小實驗」</h1>
         </div>
       </div>
 
@@ -43,24 +42,33 @@
     <!-- 核心動手操作大舞台 (佔比 80%+) -->
     <section class="main-stage-card" id="main-stage-container"></section>
 
-    <!-- 📄 紙本工作紙填寫引導欄 (小組看螢幕寫工作紙) -->
-    <section class="worksheet-guide-bar">
-      <div class="guide-header">
-        <h3>📄 個人紙本工作紙 ｜ 課堂填寫即時指南</h3>
-        <span style="font-size:0.8rem; color:#78350f;">小組全員依據 iPad 實測數據填寫各自桌面上的紙本記錄單</span>
+    <!-- 🎓 教師最後的總結（預設摺合） -->
+    <section class="teacher-summary-card">
+      <div class="summary-toggle-header" id="summary-toggle-btn">
+        <div class="summary-title-area">
+          <span class="summary-icon">🎓</span>
+          <h3>教師最後的總結</h3>
+          <span class="summary-badge">課堂提煉 ｜ 算式抽象</span>
+        </div>
+        <div class="summary-arrow-indicator" id="summary-arrow">
+          <span id="summary-arrow-text">點擊展開總結</span>
+          <span class="arrow-icon" id="summary-arrow-icon">▼</span>
+        </div>
       </div>
       
-      <div class="guide-steps-grid">
-        <div class="guide-step-item" id="guide-step-1">
-          【工作紙第 1 題】：等待實測中...
+      <!-- 總結內容區（預設隱藏/摺合） -->
+      <div class="summary-body-collapse" id="summary-collapse-content" style="display: none;">
+        <div class="summary-grid">
+          <div class="summary-point-box" id="summary-core-point">
+            <!-- 核心概念總結 -->
+          </div>
+          <div class="summary-point-box" id="summary-formula-point">
+            <!-- 核心算式/定理 -->
+          </div>
         </div>
-        <div class="guide-step-item" id="guide-step-2">
-          【工作紙第 2 題】：等待實測中...
+        <div class="summary-quote-box" id="summary-quote-text">
+          <!-- 總結金句/口訣 -->
         </div>
-      </div>
-
-      <div class="guide-quote-row" id="guide-quote-box">
-        🗣️ 【發言人說理】：請進行實驗操作以獲取結論金句...
       </div>
     </section>
   </main>

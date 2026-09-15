@@ -27,14 +27,14 @@ window.TIMSS_LABS['W04'] = {
     }
   },
 
-  getWorksheetGuide() {
+  getTeacherSummary() {
     const item = this.state.items[this.state.itemKey];
     const s = this.state.start;
     const e = parseFloat((s + item.len).toFixed(1));
     return {
-      step1: `【工作紙第 1 題】：待測物 <strong>${item.name}</strong>，左端起點在 <strong>${s.toFixed(1)} cm</strong>，右端終點在 <strong>${e.toFixed(1)} cm</strong>。`,
-      step2: `【工作紙第 2 題】：算式：<strong>${e.toFixed(1)} − ${s.toFixed(1)} = ${item.len.toFixed(1)} cm</strong>。完整尺驗證真實長度為 <strong>${item.len.toFixed(1)} cm</strong>。`,
-      quote: `🗣️ 【發言人說理】：我們組測量鉛筆，左端在 ${s.toFixed(1)} cm，右端在 ${e.toFixed(1)} cm。因為前面 0 到 ${s.toFixed(1)} cm 沒有碰到物體，必須減掉！所以用終點減起點：${e.toFixed(1)} − ${s.toFixed(1)} = ${item.len.toFixed(1)} cm！`
+      core: `<h4>💡 核心概念提煉</h4><p>用尺測量物體長度的本質是「<strong>統計所跨越的長度單位區間</strong>」，絕不是盲目看右邊的終點數字！當直尺磨損、斷裂或未從 0 刻度起測時，終點讀數包含了 0 到起點的「虛無空白段」，必須將起點剔除。</p>`,
+      formula: `<h4>📐 核心測量公式與辨析</h4><p>通用長度公式：<strong>物體真實長度 = 右端終點刻度 − 左端起點刻度</strong><br>當前實測：<strong>${e.toFixed(1)} − ${s.toFixed(1)} = ${item.len.toFixed(1)} cm</strong><br>❌ 常見迷思錯誤：直接誤讀為終點 ${e.toFixed(1)} cm（多算了前段 ${s.toFixed(1)} cm 空白！）。</p>`,
+      quote: `🎯 <strong>教師總結金句：</strong>「斷尺測量莫慌張，起點非零減起點；終點減去起點數，區間長度現原形！」`
     };
   },
 
@@ -202,7 +202,7 @@ window.TIMSS_LABS['W04'] = {
     document.getElementById('w04-good-formula').innerText = `${e.toFixed(1)} − ${s.toFixed(1)} = ${len.toFixed(1)} cm`;
 
     if (window.ipadApp) {
-      window.ipadApp.updateWorksheetGuide(this.getWorksheetGuide());
+      window.ipadApp.updateTeacherSummary(this.getTeacherSummary());
     }
   },
 
