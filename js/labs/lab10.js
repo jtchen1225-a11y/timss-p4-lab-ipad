@@ -1,6 +1,6 @@
 /**
  * lab10.js - 第 10 週：【天平守恆速算大魔術】 (LAB-W10-N-COMP) - iPad 優化版
- * 教師引導 ➔ 學生主動探究 ➔ 任務切換立即歸零待測
+ * 教師引導 ➔ 學生主動探究 ➔ 任務切換立即歸零待測 ➔ 資優延伸探究 (高階雙重補償 567+198)
  */
 
 window.TIMSS_LABS = window.TIMSS_LABS || {};
@@ -12,33 +12,35 @@ window.TIMSS_LABS['W10'] = {
   domain: '數與運算 Number',
   domainType: 'number',
   cognitive: '推理 Reasoning',
-  question: '計算 348 + 99，我們在天平上多放了 100g 砝碼指針歪了！怎樣只動 1g 讓天平重新平衡？減法多減又該怎樣？',
-  activeRole: '🔴 操作員(D) 放置補償砝碼 ➔ 🟢 發言人(B) 朗讀速算口訣',
+  question: '算 348 + 99 時，為什麼可以「先加 100 再減 1」？算 523 − 198 時，為什麼是「先減 200 再加 2」？天平失衡如何演示「多加要減、多減要加」？',
+  activeRole: '🔴 操作員(D) 放下湊整大砝碼 ➔ 🟢 發言人(B) 詮釋多加要減與多減要加',
 
   state: {
-    mission: 'add', // 'add', 'sub'
+    mission: 'add', // 'add', 'sub', 'extend'
+    extType: 'add2', // 'add2' (567+198), 'sub1' (832-299)
     step: 0,
     userAction: 'none'
   },
 
   getTeacherSummary() {
     return {
-      core: `<h4>💡 核心概念提煉</h4><p>湊整速算的核心是「<strong>等量平衡與補償原理</strong>」。將接近整百的數轉化為整百數運算，極大降低了心算難度，但破壞了原有數值平衡。在同側進行逆向補償：若多加了整百，天平偏重，同側必須減去差額（<strong>多加要減</strong>）；若多減了整百，天平失重翹起，同側必須加回差額（<strong>多減要加</strong>）。</p>`,
-      formula: `<h4>📐 核心代數變換與補償模型</h4><p>• <strong>加法湊整（多加要減）：</strong>$348 + 99 = 348 + (100 - 1) = 348 + 100 - 1 = \\mathbf{447}$<br>• <strong>減法湊整（多減要加）：</strong>$523 - 198 = 523 - (200 - 2) = 523 - 200 + 2 = \\mathbf{325}$<br>• <strong>代數本質：</strong>括號前是減號，去括號時括號內減號變加號（負負得正）。</p>`,
+      core: `<h4>💡 核心概念提煉</h4><p>湊整速算的本質是<strong>「恆等變形」與「等量平衡補償」</strong>。接近整百的數字（如 99、198）運算繁瑣，先視為整百計算是「製造失衡」，隨後的增減是「恢復平衡」：<br>• 加法湊整：多加了整百零頭，同側必須<strong>減去</strong>（多加要減）<br>• 減法湊整：多扣除了整百零頭，同側必須<strong>補回</strong>（多減要加）。</p>`,
+      formula: `<h4>📐 核心速算模型</h4><p>• <strong>加法湊整補償：</strong>$a + (100 - k) = a + 100 - k$（例：$348 + 99 = 348 + 100 - 1 = \\mathbf{447}$）<br>• <strong>減法湊整補償：</strong>$a - (200 - k) = a - 200 + k$（例：$523 - 198 = 523 - 200 + 2 = \\mathbf{325}$）<br>• <strong>代數本質：</strong>括號前是減號，去括號要變號！</p>`,
       quote: `🎯 <strong>教師總結金句：</strong>「湊整速算天平平，多加要減保平衡；多減要加莫記反，去括號變號見神奇！」`
     };
   },
 
   render(container) {
     this.container = container;
-    this.state = { mission: 'add', step: 0, userAction: 'none' };
+    this.state = { mission: 'add', extType: 'add2', step: 0, userAction: 'none' };
 
     container.innerHTML = `
       <!-- 任務切換列：點擊任何任務立即歸零 -->
       <div class="ipad-controls-bar">
         <div class="controls-left-group">
-          <button class="touch-btn primary" id="w10-tab-add">➕ 任務一：加法湊整大魔術 (348 + 99)</button>
-          <button class="touch-btn" id="w10-tab-sub">➖ 任務二：減法湊整大魔術 (523 − 198)</button>
+          <button class="touch-btn primary" id="w10-tab-add">➕ 任務一：加法湊整 (348 + 99)</button>
+          <button class="touch-btn" id="w10-tab-sub">➖ 任務二：減法湊整 (523 − 198)</button>
+          <button class="touch-btn" id="w10-tab-ext">🚀 任務三：資優延伸探究 (雙重補償魔術)</button>
         </div>
         <button class="touch-btn" id="w10-btn-reset">🔄 當前任務歸零待測</button>
       </div>
@@ -54,6 +56,15 @@ window.TIMSS_LABS['W10'] = {
         </div>
         <div class="guide-hint-subtext" id="w10-guide-sub">
           💡 天平目前在基準平衡狀態，左盤放著精確目標值 447g。
+        </div>
+      </div>
+
+      <!-- 任務三專用題型切換列 -->
+      <div class="ipad-controls-bar" style="background:#f0fdf4; border:2px solid #86efac; display:none;" id="w10-ext-bar">
+        <span style="font-weight:bold; color:#166534;">🚀 資優高階題型：</span>
+        <div style="display:flex; gap:8px;">
+          <button class="touch-btn primary" id="w10-ext-btn-a">奧數題 A：567 ＋ 198 (湊整+200)</button>
+          <button class="touch-btn" id="w10-ext-btn-b">奧數題 B：832 − 299 (湊整-300)</button>
         </div>
       </div>
 
@@ -98,15 +109,25 @@ window.TIMSS_LABS['W10'] = {
 
     // 任務切換：一律歸零待測！
     bind('w10-tab-add', () => {
-      this.state = { mission: 'add', step: 0, userAction: 'none' };
+      this.state = { mission: 'add', extType: 'add2', step: 0, userAction: 'none' };
       this.updateTabs('w10-tab-add');
+      document.getElementById('w10-ext-bar').style.display = 'none';
       window.soundFx.click();
       this.update();
     });
 
     bind('w10-tab-sub', () => {
-      this.state = { mission: 'sub', step: 0, userAction: 'none' };
+      this.state = { mission: 'sub', extType: 'add2', step: 0, userAction: 'none' };
       this.updateTabs('w10-tab-sub');
+      document.getElementById('w10-ext-bar').style.display = 'none';
+      window.soundFx.click();
+      this.update();
+    });
+
+    bind('w10-tab-ext', () => {
+      this.state = { mission: 'extend', extType: 'add2', step: 0, userAction: 'none' };
+      this.updateTabs('w10-tab-ext');
+      document.getElementById('w10-ext-bar').style.display = 'flex';
       window.soundFx.click();
       this.update();
     });
@@ -117,10 +138,31 @@ window.TIMSS_LABS['W10'] = {
       window.soundFx.click();
       this.update();
     });
+
+    // 任務三子切換
+    bind('w10-ext-btn-a', () => {
+      this.state.extType = 'add2';
+      this.state.step = 0;
+      this.state.userAction = 'none';
+      document.getElementById('w10-ext-btn-a')?.classList.add('primary');
+      document.getElementById('w10-ext-btn-b')?.classList.remove('primary');
+      window.soundFx.click();
+      this.update();
+    });
+
+    bind('w10-ext-btn-b', () => {
+      this.state.extType = 'sub1';
+      this.state.step = 0;
+      this.state.userAction = 'none';
+      document.getElementById('w10-ext-btn-b')?.classList.add('primary');
+      document.getElementById('w10-ext-btn-a')?.classList.remove('primary');
+      window.soundFx.click();
+      this.update();
+    });
   },
 
   updateTabs(activeId) {
-    ['w10-tab-add', 'w10-tab-sub'].forEach(id => {
+    ['w10-tab-add', 'w10-tab-sub', 'w10-tab-ext'].forEach(id => {
       const b = document.getElementById(id);
       if (b) {
         if (id === activeId) b.classList.add('primary');
@@ -191,14 +233,14 @@ window.TIMSS_LABS['W10'] = {
 
         if (this.state.userAction === 'wrong') {
           guideTag.className = 'guide-step-tag step-alert';
-          guideTag.innerText = '❌ 失衡加劇！';
-          guideText.innerHTML = `本來就多加了 1g（448g），如果再加 1g 就變成 449g，天平歪得更厲害了！請選擇<strong>「✂️ 從右盤取走 1g」</strong>！`;
-          guideSub.innerText = '💡 多放了必須拿走才能補償。';
+          guideTag.innerText = '❌ 更加下沉了！';
+          guideText.innerHTML = `原本就多加了 1g（448g），再加 1g 變成 449g，天平更加傾斜！多加了必須減去！`;
+          guideSub.innerText = '💡 請選擇「✂️ 從右盤取走 1g」。';
         } else {
           guideTag.className = 'guide-step-tag step-alert';
-          guideTag.innerText = '⚠️ 老師引導 ➔ 偏重難題！如何補償？';
-          guideText.innerHTML = `<strong>天平向右偏重！</strong>目標只要加 99g，放了 100g 導致<strong>多加了 1g</strong>（448g vs 447g）！如何只動 1g 讓天平回正？請操作員在下方做出補償抉擇！`;
-          guideSub.innerText = '💡 請全班思考速算口訣：多加了該怎麼辦？';
+          guideTag.innerText = '⚠️ 老師引導 ➔ 失衡難題！如何補償？';
+          guideText.innerHTML = `<strong>右盤沉下去了！</strong>原本只需要加 99g，放了 100g 導致<strong>多加了 1g</strong>（448g vs 447g）！如何只動 1g 讓天平恢復平衡？請操作員在下方做出抉擇！`;
+          guideSub.innerText = '💡 請全班思考加法速算口訣：多加了該怎麼辦？';
         }
 
       } else if (this.state.step === 2) {
@@ -208,7 +250,7 @@ window.TIMSS_LABS['W10'] = {
         rT.innerHTML = `<rect x="465" y="205" width="150" height="28" fill="#10b981" rx="4"/><text x="540" y="224" fill="white" font-weight="bold" font-size="11" text-anchor="middle">348+100−1 ＝ 447g</text>`;
 
         actionsBar.innerHTML = `
-          <span style="font-weight:bold; color:#059669;">🎉 補償成功！天平完美水平！</span>
+          <span style="font-weight:bold; color:#059669;">🎉 補償成功！天平完美歸零！</span>
           <button class="touch-btn" id="w10-act-restart">🔄 重新體驗加法湊整</button>
         `;
         document.getElementById('w10-act-restart')?.addEventListener('click', () => {
@@ -223,7 +265,7 @@ window.TIMSS_LABS['W10'] = {
         guideSub.innerText = '🎯 教師金句：湊整速算天平平，多加要減保平衡！';
       }
 
-    } else {
+    } else if (this.state.mission === 'sub') {
       guideTitle.innerText = '任務二：減法湊整大魔術 (523 − 198)';
 
       if (this.state.step === 0) {
@@ -304,6 +346,97 @@ window.TIMSS_LABS['W10'] = {
         guideTag.innerText = '🎉 探究結論 ➔ 減法速算口訣【多減要加】';
         guideText.innerHTML = `<strong>天平完美水平！</strong>多扣了 2g，就必須在同側<strong>加回 2g</strong> 補償！算式為 <strong>523 − 198 ＝ 523 − 200 ＋ 2 ＝ 325</strong>！負負得正，變號見神奇！`;
         guideSub.innerText = '🎯 教師金句：多減要加莫記反，去括號變號見神奇！';
+      }
+
+    } else if (this.state.mission === 'extend') {
+      const isAdd = this.state.extType === 'add2';
+      const base = isAdd ? 567 : 832;
+      const target = isAdd ? 765 : 533; // 567+198=765; 832-299=533
+      const roundAmt = isAdd ? 200 : 300;
+      const compAmt = isAdd ? 2 : 1;
+      const signWord = isAdd ? '多加 2g' : '多減 1g';
+      guideTitle.innerText = isAdd ? '任務三：資優延伸探究 (567 ＋ 198 湊整200)' : '任務三：資優延伸探究 (832 − 299 湊整300)';
+
+      if (this.state.step === 0) {
+        beam.setAttribute('transform', 'rotate(0, 340, 150)');
+        needle.style.stroke = '#10b981';
+        lT.innerHTML = `<rect x="75" y="205" width="130" height="28" fill="#0284c7" rx="4"/><text x="140" y="224" fill="white" font-weight="bold" font-size="12" text-anchor="middle">目標值 ${target}g</text>`;
+        rT.innerHTML = `<rect x="475" y="205" width="130" height="28" fill="#64748b" rx="4"/><text x="540" y="224" fill="white" font-weight="bold" font-size="12" text-anchor="middle">基準值 ${base}g</text>`;
+
+        actionsBar.innerHTML = `
+          <span style="font-weight:bold;">第 1 步操作 ➔</span>
+          <button class="touch-btn warning" id="w10-act-ext-round" style="font-weight:800;">${isAdd ? '📥 右盤放上 +200g 湊整大砝碼' : '📤 從右盤拿走 300g 湊整大砝碼'}</button>
+        `;
+        document.getElementById('w10-act-ext-round')?.addEventListener('click', () => {
+          this.state.step = 1;
+          window.soundFx.tiltBuzz();
+          this.update();
+        });
+
+        guideTag.className = 'guide-step-tag';
+        guideTag.innerText = '🚀 資優挑戰 ➔ 湊整大砝碼操作';
+        guideText.innerHTML = isAdd
+          ? `算 567 ＋ 198。198 接近 200。請點擊<strong>「📥 放上 +200g」</strong>！`
+          : `算 832 − 299。299 接近 300。請點擊<strong>「📤 拿走 300g」</strong>！`;
+        guideSub.innerText = `💡 目標值為 ${target}g。`;
+
+      } else if (this.state.step === 1) {
+        const curAngle = isAdd ? 14 : -14;
+        beam.setAttribute('transform', `rotate(${curAngle}, 340, 150)`);
+        needle.style.stroke = '#ef4444';
+        lT.innerHTML = `<rect x="75" y="${isAdd ? 190 : 220}" width="130" height="28" fill="#0284c7" rx="4"/><text x="140" y="${isAdd ? 209 : 239}" fill="white" font-weight="bold" font-size="12" text-anchor="middle">目標 ${target}g</text>`;
+        const midVal = isAdd ? base + roundAmt : base - roundAmt;
+        rT.innerHTML = `<rect x="470" y="${isAdd ? 225 : 190}" width="140" height="28" fill="#ef4444" rx="4"/><text x="540" y="${isAdd ? 244 : 209}" fill="white" font-weight="bold" font-size="12" text-anchor="middle">${midVal}g (${isAdd ? `+${compAmt}g!` : `-${compAmt}g!`})</text>`;
+
+        actionsBar.innerHTML = isAdd ? `
+          <span style="font-weight:bold; color:#b91c1c;">⚠️ 右盤重了 2g！如何補償？</span>
+          <button class="touch-btn success" id="w10-act-ext-fix-ok">✂️ 從右盤取走 2g (多加要減)</button>
+          <button class="touch-btn danger" id="w10-act-ext-fix-no">➕ 在右盤再加 2g</button>
+        ` : `
+          <span style="font-weight:bold; color:#b91c1c;">⚠️ 右盤輕了 1g 翹起來了！如何補償？</span>
+          <button class="touch-btn success" id="w10-act-ext-fix-ok">➕ 在右盤加回 1g (多減要加)</button>
+          <button class="touch-btn danger" id="w10-act-ext-fix-no">📤 從右盤再拿走 1g</button>
+        `;
+
+        document.getElementById('w10-act-ext-fix-ok')?.addEventListener('click', () => {
+          this.state.step = 2;
+          window.soundFx.balanceChime();
+          this.update();
+        });
+
+        document.getElementById('w10-act-ext-fix-no')?.addEventListener('click', () => {
+          window.soundFx.tiltBuzz();
+          alert('方向反了！多加了要減，多減了要加！');
+        });
+
+        guideTag.className = 'guide-step-tag step-alert';
+        guideTag.innerText = `⚠️ 資優挑戰 ➔ ${signWord}！如何補償回正？`;
+        guideText.innerHTML = isAdd
+          ? `加了 200g 導致右盤 <strong>多加了 2g</strong>！請在下方點擊進行精確補償！`
+          : `扣了 300g 導致右盤 <strong>多減了 1g</strong>！請在下方點擊進行精確補償！`;
+        guideSub.innerText = '💡 口訣：多加要減，多減要加！';
+
+      } else if (this.state.step === 2) {
+        beam.setAttribute('transform', 'rotate(0, 340, 150)');
+        needle.style.stroke = '#10b981';
+        lT.innerHTML = `<rect x="75" y="205" width="130" height="28" fill="#0284c7" rx="4"/><text x="140" y="224" fill="white" font-weight="bold" font-size="12" text-anchor="middle">目標 ${target}g</text>`;
+        rT.innerHTML = `<rect x="465" y="205" width="150" height="28" fill="#10b981" rx="4"/><text x="540" y="224" fill="white" font-weight="bold" font-size="11" text-anchor="middle">${isAdd ? `${base}+200−2 ＝ ${target}g` : `${base}−300+1 ＝ ${target}g`}</text>`;
+
+        actionsBar.innerHTML = `
+          <span style="font-weight:bold; color:#059669;">🎉 補償成功！天平完美平衡！</span>
+          <button class="touch-btn" id="w10-act-ext-reset">🔄 重新挑戰</button>
+        `;
+        document.getElementById('w10-act-ext-reset')?.addEventListener('click', () => {
+          this.state.step = 0;
+          this.update();
+        });
+
+        guideTag.className = 'guide-step-tag step-done';
+        guideTag.innerText = '🎉 探究結論 ➔ 高階湊整速算完全掌握！';
+        guideText.innerHTML = isAdd
+          ? `<strong>天平平了！</strong> 567 ＋ 198 ＝ 567 ＋ 200 − 2 ＝ <strong>${target}</strong>！多加 2 減 2，速算又快又準！`
+          : `<strong>天平平了！</strong> 832 − 299 ＝ 832 − 300 ＋ 1 ＝ <strong>${target}</strong>！多減 1 加 1，變號真理完全驗證！`;
+        guideSub.innerText = '🎯 體會湊整速算的數學守恆本質！';
       }
     }
 

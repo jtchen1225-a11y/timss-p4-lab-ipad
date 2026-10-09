@@ -1,6 +1,6 @@
 /**
  * lab08.js - 第 8 週：【俄羅斯方塊變形獸】 (LAB-W08-MG-AREA) - iPad 優化版
- * 教師引導 ➔ 學生主動探究 ➔ 任務切換立即歸零待測
+ * 教師引導 ➔ 學生主動探究 ➔ 任務切換立即歸零待數 ➔ 資優延伸探究 (8 塊極限變形挑戰)
  */
 
 window.TIMSS_LABS = window.TIMSS_LABS || {};
@@ -9,14 +9,15 @@ window.TIMSS_LABS['W08'] = {
   id: 'W08',
   code: 'LAB-W08-MG-AREA',
   title: '俄羅斯方塊變形獸',
-  domain: '測量與幾何 M&G',
-  domainType: 'mg',
-  cognitive: '推理 Reasoning',
-  question: '用 6 塊方塊拼成一字長蛇形、2×3 長方形、L 形怪獸。它們的面積變了嗎？它們的外圍周界會一樣嗎？',
-  activeRole: '🔴 操作員(D) 拼擺不同怪獸 ➔ 🟢 發言人(B) 解密肚裡藏邊',
+  domain: '測量與幾何 Measurement & Geometry',
+  domainType: 'geometry',
+  cognitive: '認識 Knowing',
+  question: '用 6 個相同的正方形方塊拼出不同圖形，它們的「面積」和「周界」會保持不變嗎？接縫到底偷走了多少長度？',
+  activeRole: '🔴 操作員(D) 變換磁板方塊拼法 ➔ 🟢 發言人(B) 解密周界縮水真相',
 
   state: {
-    mission: 'strip', // 'strip', 'rect', 'lshape'
+    mission: 'strip', // 'strip', 'rect', 'lshape', 'extend'
+    extType: 'ext_rect', // 'ext_strip', 'ext_rect', 'ext_stair'
     showPerimeter: false,
     showSeams: false,
     blocks: []
@@ -24,15 +25,15 @@ window.TIMSS_LABS['W08'] = {
 
   getTeacherSummary() {
     return {
-      core: `<h4>💡 核心概念提煉</h4><p>幾何拼擺中存在「<strong>面積守恆定律</strong>」：只要方塊總數不變（6 個方格），無論擺成一字長蛇、緊湊矩形還是 L 形，面積恆為 6 單位。但<strong>周界絕不守恆</strong>！兩個方塊每拼接一條邊，就會有 2 條邊被「吞進內部」不再計入周界。拼擺越緊湊、重合接縫越多，外圍周界就越短！</p>`,
-      formula: `<h4>📐 核心計算與邊長折損模型</h4><p>• <strong>原始邊長總數：</strong>$6 \\times 4 = 24$ 條邊<br>• <strong>一字長條（重合 5 縫）：</strong>$C = 24 - (5 \\times 2) = \\mathbf{14\\text{ 單位}}$（最長周界）<br>• <strong>2×3 矩形（重合 7 縫）：</strong>$C = 24 - (7 \\times 2) = \\mathbf{10\\text{ 單位}}$（最短周界）<br>• <strong>面積結論：</strong>$S \\equiv 6\\text{ 格}$（面積相同，周界可以截然不同！）</p>`,
-      quote: `🎯 <strong>教師總結金句：</strong>「拼塊不增面積同，形狀千變周界殊；內部貼合吞邊線，越緊湊者周越短！」`
+      core: `<h4>💡 核心概念提煉</h4><p>在平面幾何中，「<strong>面積守恆</strong>」指圖形只要由固定數量的等大方塊拼成，其面積永遠不變。但「<strong>周界並不守恆</strong>」！當方塊靠攏拼合時，相鄰的邊會重疊變成內部「<strong>內部接縫（肚裡藏邊）</strong>」。<strong>每形成 1 條接縫，就有 2 條邊被吞入內部</strong>，導致外露周界減少 2 個單位！</p>`,
+      formula: `<h4>📐 核心接縫周界公式</h4><p>• <strong>獨立散裝總邊數：</strong>$4 \\times N$<br>• <strong>外露周界定理：</strong>$\\text{周界} = 4N - 2 \\times \\mathbf{(\\text{內部接縫數})}$<br>• <strong>極值結論：</strong>圖形越緊湊，內部接縫越多，吞掉的邊越多，外露周界越短！</p>`,
+      quote: `🎯 <strong>教師總結金句：</strong>「拼塊不變面守恆，接縫一現吞兩邊；越是緊湊周越短，展開長蛇周界長！」`
     };
   },
 
   render(container) {
     this.container = container;
-    this.state = { mission: 'strip', showPerimeter: false, showSeams: false, blocks: [] };
+    this.state = { mission: 'strip', extType: 'ext_rect', showPerimeter: false, showSeams: false, blocks: [] };
     this.setPreset('strip');
 
     container.innerHTML = `
@@ -42,6 +43,7 @@ window.TIMSS_LABS['W08'] = {
           <button class="touch-btn primary" id="w08-tab-s">🐍 任務一：1×6 一字長蛇形</button>
           <button class="touch-btn" id="w08-tab-r">📦 任務二：2×3 緊湊矩形</button>
           <button class="touch-btn" id="w08-tab-l">🦎 任務三：L 形變形獸</button>
+          <button class="touch-btn" id="w08-tab-ext">🚀 任務四：資優延伸探究 (8塊極限變形)</button>
         </div>
         <button class="touch-btn" id="w08-btn-reset">🔄 當前造型歸零待數</button>
       </div>
@@ -57,6 +59,16 @@ window.TIMSS_LABS['W08'] = {
         </div>
         <div class="guide-hint-subtext" id="w08-guide-sub">
           💡 目前外圍周界處於隱藏待數狀態。
+        </div>
+      </div>
+
+      <!-- 任務四專用子造型切換列 -->
+      <div class="ipad-controls-bar" style="background:#f0fdf4; border:2px solid #86efac; display:none;" id="w08-ext-bar">
+        <span style="font-weight:bold; color:#166534;">🚀 8 塊挑戰（面積恆為 8 格）：</span>
+        <div style="display:flex; gap:8px;">
+          <button class="touch-btn" id="w08-ext-b-strip">1×8 長條</button>
+          <button class="touch-btn primary" id="w08-ext-b-rect">2×4 矩形 (最緊湊)</button>
+          <button class="touch-btn" id="w08-ext-b-stair">階梯特殊形</button>
         </div>
       </div>
 
@@ -86,8 +98,8 @@ window.TIMSS_LABS['W08'] = {
         <div style="display:flex; justify-content:center; gap:24px; margin-top:16px; width:100%; max-width:640px;">
           <div style="flex:1; background:#ecfdf5; border:2.5px solid #10b981; border-radius:12px; padding:12px; text-align:center;">
             <div style="font-size:0.85rem; color:#065f46; font-weight:bold;">📦 總面積 (方塊個數)</div>
-            <div style="font-size:1.8rem; font-weight:900; color:#059669;">6 格 (守恆！)</div>
-            <span style="font-size:0.8rem; color:#047857;">每格 2cm×2cm ＝ 24 cm²</span>
+            <div style="font-size:1.8rem; font-weight:900; color:#059669;" id="w08-area-val">6 格 (守恆！)</div>
+            <span style="font-size:0.8rem; color:#047857;" id="w08-area-cm">每格 2cm×2cm ＝ 24 cm²</span>
           </div>
 
           <div style="flex:1; background:#eff6ff; border:2.5px solid #3b82f6; border-radius:12px; padding:12px; text-align:center;">
@@ -120,6 +132,22 @@ window.TIMSS_LABS['W08'] = {
         { r: 1, c: 4 }, { r: 2, c: 4 }, { r: 3, c: 4 },
         { r: 4, c: 4 }, { r: 4, c: 5 }, { r: 4, c: 6 }
       ];
+    } else if (type === 'ext_strip') {
+      this.state.blocks = [
+        { r: 3, c: 2 }, { r: 3, c: 3 }, { r: 3, c: 4 }, { r: 3, c: 5 },
+        { r: 3, c: 6 }, { r: 3, c: 7 }, { r: 3, c: 8 }, { r: 3, c: 9 }
+      ];
+    } else if (type === 'ext_rect') {
+      this.state.blocks = [
+        { r: 2, c: 4 }, { r: 2, c: 5 }, { r: 2, c: 6 }, { r: 2, c: 7 },
+        { r: 3, c: 4 }, { r: 3, c: 5 }, { r: 3, c: 6 }, { r: 3, c: 7 }
+      ];
+    } else if (type === 'ext_stair') {
+      this.state.blocks = [
+        { r: 1, c: 5 }, { r: 1, c: 6 },
+        { r: 2, c: 4 }, { r: 2, c: 5 }, { r: 2, c: 6 }, { r: 2, c: 7 },
+        { r: 3, c: 5 }, { r: 3, c: 6 }
+      ];
     }
   },
 
@@ -135,6 +163,7 @@ window.TIMSS_LABS['W08'] = {
       this.state.showPerimeter = false;
       this.state.showSeams = false;
       this.updateTabs('w08-tab-s');
+      document.getElementById('w08-ext-bar').style.display = 'none';
       window.soundFx.stampThud();
       this.update();
     });
@@ -144,6 +173,7 @@ window.TIMSS_LABS['W08'] = {
       this.state.showPerimeter = false;
       this.state.showSeams = false;
       this.updateTabs('w08-tab-r');
+      document.getElementById('w08-ext-bar').style.display = 'none';
       window.soundFx.stampThud();
       this.update();
     });
@@ -153,6 +183,19 @@ window.TIMSS_LABS['W08'] = {
       this.state.showPerimeter = false;
       this.state.showSeams = false;
       this.updateTabs('w08-tab-l');
+      document.getElementById('w08-ext-bar').style.display = 'none';
+      window.soundFx.stampThud();
+      this.update();
+    });
+
+    bind('w08-tab-ext', () => {
+      this.setPreset('ext_rect');
+      this.state.mission = 'extend';
+      this.state.extType = 'ext_rect';
+      this.state.showPerimeter = false;
+      this.state.showSeams = false;
+      this.updateTabs('w08-tab-ext');
+      document.getElementById('w08-ext-bar').style.display = 'flex';
       window.soundFx.stampThud();
       this.update();
     });
@@ -160,6 +203,43 @@ window.TIMSS_LABS['W08'] = {
     bind('w08-btn-reset', () => {
       this.state.showPerimeter = false;
       this.state.showSeams = false;
+      window.soundFx.click();
+      this.update();
+    });
+
+    // 任務四子按鈕
+    bind('w08-ext-b-strip', () => {
+      this.setPreset('ext_strip');
+      this.state.mission = 'extend';
+      this.state.extType = 'ext_strip';
+      this.state.showPerimeter = false;
+      this.state.showSeams = false;
+      ['w08-ext-b-strip', 'w08-ext-b-rect', 'w08-ext-b-stair'].forEach(id => document.getElementById(id)?.classList.remove('primary'));
+      document.getElementById('w08-ext-b-strip')?.classList.add('primary');
+      window.soundFx.click();
+      this.update();
+    });
+
+    bind('w08-ext-b-rect', () => {
+      this.setPreset('ext_rect');
+      this.state.mission = 'extend';
+      this.state.extType = 'ext_rect';
+      this.state.showPerimeter = false;
+      this.state.showSeams = false;
+      ['w08-ext-b-strip', 'w08-ext-b-rect', 'w08-ext-b-stair'].forEach(id => document.getElementById(id)?.classList.remove('primary'));
+      document.getElementById('w08-ext-b-rect')?.classList.add('primary');
+      window.soundFx.click();
+      this.update();
+    });
+
+    bind('w08-ext-b-stair', () => {
+      this.setPreset('ext_stair');
+      this.state.mission = 'extend';
+      this.state.extType = 'ext_stair';
+      this.state.showPerimeter = false;
+      this.state.showSeams = false;
+      ['w08-ext-b-strip', 'w08-ext-b-rect', 'w08-ext-b-stair'].forEach(id => document.getElementById(id)?.classList.remove('primary'));
+      document.getElementById('w08-ext-b-stair')?.classList.add('primary');
       window.soundFx.click();
       this.update();
     });
@@ -180,7 +260,7 @@ window.TIMSS_LABS['W08'] = {
   },
 
   updateTabs(activeId) {
-    ['w08-tab-s', 'w08-tab-r', 'w08-tab-l'].forEach(id => {
+    ['w08-tab-s', 'w08-tab-r', 'w08-tab-l', 'w08-tab-ext'].forEach(id => {
       const b = document.getElementById(id);
       if (b) {
         if (id === activeId) b.classList.add('primary');
@@ -194,10 +274,16 @@ window.TIMSS_LABS['W08'] = {
     const seamsG = document.getElementById('w08-seams-g');
     const pVal = document.getElementById('w08-p-val');
     const pCm = document.getElementById('w08-p-cm');
+    const aVal = document.getElementById('w08-area-val');
+    const aCm = document.getElementById('w08-area-cm');
 
-    const sz = 44;
     const blocks = this.state.blocks;
+    const count = blocks.length;
+    const sz = 44;
     const set = new Set(blocks.map(b => `${b.r},${b.c}`));
+
+    if (aVal) aVal.innerText = `${count} 格 (守恆！)`;
+    if (aCm) aCm.innerText = `每格 2cm×2cm ＝ ${count * 4} cm²`;
 
     let html = '';
     let seamsHTML = '';
@@ -299,6 +385,21 @@ window.TIMSS_LABS['W08'] = {
         guideTag.innerText = '🎉 探究結論 ➔ 周界 12 單位';
         guideText.innerHTML = `相鄰接縫有 <strong>${internalSeams} 條</strong>（吞掉 ${buriedEdges} 條邊），外圍周界為 <strong>24 − ${buriedEdges} ＝ ${exposed} 單位（${exposed * 2} cm）</strong>！面積相同，形狀不同周界截然不同！`;
         guideSub.innerText = '🎯 教師金句：面積守恆周界變，形狀千變見真章！';
+      }
+
+    } else if (this.state.mission === 'extend') {
+      guideTitle.innerText = '任務四：資優延伸探究 (8 塊極限變形挑戰)';
+
+      if (!this.state.showPerimeter) {
+        guideTag.className = 'guide-step-tag';
+        guideTag.innerText = '🚀 資優探究 ➔ 待掃描周界';
+        guideText.innerHTML = `8 塊正方形拼合（面積固定為 8 格）。請全班預測當前造型的周界，然後點擊<strong>「🔍 掃描外露周界」</strong>！`;
+        guideSub.innerText = '💡 原始 8 塊共有 32 條邊，觀察接縫能吃掉多少！';
+      } else {
+        guideTag.className = 'guide-step-tag step-done';
+        guideTag.innerText = '🎉 探究發現 ➔ 極限周界揭秘';
+        guideText.innerHTML = `內部接縫 <strong>${internalSeams} 條</strong>（吞掉 ${buriedEdges} 條邊）！外露周界為 <strong>32 − ${buriedEdges} ＝ ${exposed} 單位 (${exposed * 2} cm)</strong>！對比 2×4 矩形 (12單位) 與 1×8 長條 (18單位)，驗證了「越緊湊周界越短」的奧數極值定理！`;
+        guideSub.innerText = '🎯 體會長寬越接近、內部藏邊越多的深刻規律！';
       }
     }
 

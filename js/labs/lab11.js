@@ -1,6 +1,6 @@
 /**
  * lab11.js - 第 11 週：【同周界不同面積反例大擂台】 (LAB-W11-MG-COUNTER) - iPad 優化版
- * 教師引導 ➔ 學生主動探究 ➔ 任務切換立即歸零待測
+ * 教師引導 ➔ 學生主動探究 ➔ 任務切換立即歸零待測 ➔ 資優延伸探究 (周界24極值：正方形面積最大)
  */
 
 window.TIMSS_LABS = window.TIMSS_LABS || {};
@@ -9,14 +9,14 @@ window.TIMSS_LABS['W11'] = {
   id: 'W11',
   code: 'LAB-W11-MG-COUNTER',
   title: '同周界不同面積反例大擂台',
-  domain: '測量與幾何 M&G',
-  domainType: 'mg',
+  domain: '測量與幾何 Measurement & Geometry',
+  domainType: 'geometry',
   cognitive: '推理 Reasoning',
-  question: '小明向全班下戰書：『周界都是 16cm 的長方形，面積肯定一模一樣！誰能拉出反例打破我的戰書？』',
-  activeRole: '🔴 操作員(D) 拉橡皮筋打擂 ➔ 🟣 質疑員(A) 審查反例證據並蓋章',
+  question: '小明放言「只要兩個長方形的周界相同，它們的面積就絕對相等！」如何用釘子板構造反例，徹底擊碎這道戰書？',
+  activeRole: '🔴 操作員(D) 調整釘子板長寬 ➔ 🟢 發言人(B) 蓋下「反例成立」大印章',
 
   state: {
-    mission: 'classic', // 'classic', 'custom'
+    mission: 'classic', // 'classic', 'custom', 'extend'
     fA: '7x1',
     fB: '5x3',
     counted: false,
@@ -43,6 +43,7 @@ window.TIMSS_LABS['W11'] = {
         <div class="controls-left-group">
           <button class="touch-btn primary" id="w11-tab-classic">🥊 任務一：經典反例對抗 (7×1 vs 5×3)</button>
           <button class="touch-btn" id="w11-tab-custom">🧩 任務二：自選尺寸構造反例</button>
+          <button class="touch-btn" id="w11-tab-ext">🚀 任務三：資優延伸探究 (周界24極值探索)</button>
         </div>
         <button class="touch-btn" id="w11-btn-reset">🔄 當前擂台歸零待測</button>
       </div>
@@ -89,7 +90,7 @@ window.TIMSS_LABS['W11'] = {
       <!-- 戰書橫幅與蓋章印記 -->
       <div style="background:#fff1f2; border:2px dashed #f43f5e; border-radius:12px; padding:12px 18px; margin-bottom:12px; position:relative; overflow:hidden;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-          <strong style="color:#be123c; font-size:1.05rem;">📜 小明戰書：『周界都是 16cm 的長方形，面積肯定一模一樣！』</strong>
+          <strong style="color:#be123c; font-size:1.05rem;" id="w11-challenge-title">📜 小明戰書：『周界都是 16cm 的長方形，面積肯定一模一樣！』</strong>
           <span id="w11-challenge-badge" style="background:#f43f5e; color:white; font-size:0.8rem; padding:3px 10px; border-radius:12px; font-weight:bold;">擂台等待擊碎</span>
         </div>
         <div id="w11-stamp" class="smash-stamp-badge">💥 反例成立！戰書粉碎！</div>
@@ -104,7 +105,7 @@ window.TIMSS_LABS['W11'] = {
             <svg width="220" height="220" viewBox="0 0 220 220" id="w11-svg-a"></svg>
           </div>
           <div style="margin-top:12px; text-align:center;">
-            <div style="font-size:0.9rem; color:#475569;">周界：(7+1)×2 ＝ <strong style="color:#0f172a; font-size:1.1rem;">16 cm</strong></div>
+            <div style="font-size:0.9rem; color:#475569;" id="w11-p-a-txt">周界：(7+1)×2 ＝ <strong style="color:#0f172a; font-size:1.1rem;">16 cm</strong></div>
             <div style="font-size:1.4rem; font-weight:900; color:#dc2626;">面積：<span id="w11-a-val">❓ 待數格子</span></div>
           </div>
         </div>
@@ -116,7 +117,7 @@ window.TIMSS_LABS['W11'] = {
             <svg width="220" height="220" viewBox="0 0 220 220" id="w11-svg-b"></svg>
           </div>
           <div style="margin-top:12px; text-align:center;">
-            <div style="font-size:0.9rem; color:#475569;">周界：(5+3)×2 ＝ <strong style="color:#0f172a; font-size:1.1rem;">16 cm</strong></div>
+            <div style="font-size:0.9rem; color:#475569;" id="w11-p-b-txt">周界：(5+3)×2 ＝ <strong style="color:#0f172a; font-size:1.1rem;">16 cm</strong></div>
             <div style="font-size:1.4rem; font-weight:900; color:#2563eb;">面積：<span id="w11-b-val">❓ 待數格子</span></div>
           </div>
         </div>
@@ -138,10 +139,25 @@ window.TIMSS_LABS['W11'] = {
       if (el) el.addEventListener('click', fn);
     };
 
+    const setSelectOptions = (opts) => {
+      const sA = document.getElementById('w11-sel-a');
+      const sB = document.getElementById('w11-sel-b');
+      if (sA && sB) {
+        sA.innerHTML = opts.map(o => `<option value="${o.v}">${o.t}</option>`).join('');
+        sB.innerHTML = opts.map(o => `<option value="${o.v}">${o.t}</option>`).join('');
+      }
+    };
+
     // 任務切換：一律歸零待測！
     bind('w11-tab-classic', () => {
       this.state = { mission: 'classic', fA: '7x1', fB: '5x3', counted: false, smashed: false };
       this.updateTabs('w11-tab-classic');
+      setSelectOptions([
+        { v: '7x1', t: '長 7 cm，寬 1 cm' },
+        { v: '6x2', t: '長 6 cm，寬 2 cm' },
+        { v: '5x3', t: '長 5 cm，寬 3 cm' },
+        { v: '4x4', t: '長 4 cm，寬 4 cm (正方形)' }
+      ]);
       const sA = document.getElementById('w11-sel-a');
       const sB = document.getElementById('w11-sel-b');
       if (sA) sA.value = '7x1';
@@ -153,10 +169,35 @@ window.TIMSS_LABS['W11'] = {
     bind('w11-tab-custom', () => {
       this.state = { mission: 'custom', fA: '6x2', fB: '4x4', counted: false, smashed: false };
       this.updateTabs('w11-tab-custom');
+      setSelectOptions([
+        { v: '7x1', t: '長 7 cm，寬 1 cm' },
+        { v: '6x2', t: '長 6 cm，寬 2 cm' },
+        { v: '5x3', t: '長 5 cm，寬 3 cm' },
+        { v: '4x4', t: '長 4 cm，寬 4 cm (正方形)' }
+      ]);
       const sA = document.getElementById('w11-sel-a');
       const sB = document.getElementById('w11-sel-b');
       if (sA) sA.value = '6x2';
       if (sB) sB.value = '4x4';
+      window.soundFx.click();
+      this.update();
+    });
+
+    bind('w11-tab-ext', () => {
+      this.state = { mission: 'extend', fA: '11x1', fB: '6x6', counted: false, smashed: false };
+      this.updateTabs('w11-tab-ext');
+      setSelectOptions([
+        { v: '11x1', t: '長 11 cm，寬 1 cm (周界24)' },
+        { v: '10x2', t: '長 10 cm，寬 2 cm (周界24)' },
+        { v: '9x3',  t: '長 9 cm，寬 3 cm (周界24)' },
+        { v: '8x4',  t: '長 8 cm，寬 4 cm (周界24)' },
+        { v: '7x5',  t: '長 7 cm，寬 5 cm (周界24)' },
+        { v: '6x6',  t: '長 6 cm，寬 6 cm (周界24 正方形)' }
+      ]);
+      const sA = document.getElementById('w11-sel-a');
+      const sB = document.getElementById('w11-sel-b');
+      if (sA) sA.value = '11x1';
+      if (sB) sB.value = '6x6';
       window.soundFx.click();
       this.update();
     });
@@ -189,33 +230,35 @@ window.TIMSS_LABS['W11'] = {
       });
     }
 
-    // 數格子
     bind('w11-btn-count', () => {
       this.state.counted = true;
       window.soundFx.balanceChime();
       this.update();
     });
 
-    // 蓋章
     bind('w11-btn-smash', () => {
+      if (!this.state.counted) {
+        window.soundFx.tiltBuzz();
+        alert('請先點擊「📐 數格子計算面積」，確認反例成立後再蓋章！');
+        return;
+      }
       const a = this.parse(this.state.fA);
       const b = this.parse(this.state.fB);
       if (a.A === b.A) {
         window.soundFx.tiltBuzz();
-        alert('兩位選手面積相同，無法作為反例！請選擇不同長寬組合進行挑戰！');
+        alert('兩位選手尺寸完全一樣，無法作為反例！請選擇不同長寬。');
         return;
       }
-      this.state.counted = true;
       this.state.smashed = true;
+      const stamp = document.getElementById('w11-stamp');
+      if (stamp) stamp.classList.add('show');
       window.soundFx.stampThud();
-      setTimeout(() => window.soundFx.successFanfare(), 300);
-      document.getElementById('w11-stamp')?.classList.add('show');
       this.update();
     });
   },
 
   updateTabs(activeId) {
-    ['w11-tab-classic', 'w11-tab-custom'].forEach(id => {
+    ['w11-tab-classic', 'w11-tab-custom', 'w11-tab-ext'].forEach(id => {
       const b = document.getElementById(id);
       if (b) {
         if (id === activeId) b.classList.add('primary');
@@ -227,9 +270,10 @@ window.TIMSS_LABS['W11'] = {
   drawGeoboard(svgId, L, W, color) {
     const svg = document.getElementById(svgId);
     if (!svg) return;
-    const spacing = 24;
-    const startX = 20;
-    const startY = 20;
+    const maxDim = Math.max(L, W, 8);
+    const spacing = Math.min(24, 200 / maxDim);
+    const startX = 10;
+    const startY = 10;
 
     let html = `
       <rect x="${startX}" y="${startY}" width="${L * spacing}" height="${W * spacing}" fill="${color}" fill-opacity="0.25" stroke="${color}" stroke-width="4.5" rx="3" />
@@ -241,9 +285,10 @@ window.TIMSS_LABS['W11'] = {
       }
     }
 
-    for (let r = 0; r <= 8; r++) {
-      for (let c = 0; c <= 8; c++) {
-        html += `<circle cx="${startX + c * spacing}" cy="${startY + r * spacing}" r="4" fill="#475569" stroke="#1e293b" stroke-width="1.5" />`;
+    const gridN = Math.max(maxDim, 8);
+    for (let r = 0; r <= gridN; r++) {
+      for (let c = 0; c <= gridN; c++) {
+        html += `<circle cx="${startX + c * spacing}" cy="${startY + r * spacing}" r="3" fill="#475569" stroke="#1e293b" stroke-width="1.2" />`;
       }
     }
 
@@ -256,6 +301,8 @@ window.TIMSS_LABS['W11'] = {
 
     document.getElementById('w11-t-a').innerText = `🔴 選手 A：長 ${a.L} cm 寬 ${a.W} cm`;
     document.getElementById('w11-t-b').innerText = `🔵 選手 B：長 ${b.L} cm 寬 ${b.W} cm`;
+    document.getElementById('w11-p-a-txt').innerHTML = `周界：(${a.L}+${a.W})×2 ＝ <strong style="color:#0f172a; font-size:1.1rem;">${a.P} cm</strong>`;
+    document.getElementById('w11-p-b-txt').innerHTML = `周界：(${b.L}+${b.W})×2 ＝ <strong style="color:#0f172a; font-size:1.1rem;">${b.P} cm</strong>`;
 
     const aVal = document.getElementById('w11-a-val');
     const bVal = document.getElementById('w11-b-val');
@@ -273,6 +320,11 @@ window.TIMSS_LABS['W11'] = {
     const stamp = document.getElementById('w11-stamp');
     if (!this.state.smashed && stamp) stamp.classList.remove('show');
 
+    const chalTitle = document.getElementById('w11-challenge-title');
+    if (chalTitle) {
+      chalTitle.innerText = `📜 小明戰書：『周界都是 ${a.P}cm 的長方形，面積肯定一模一樣！』`;
+    }
+
     // 導引條更新
     const guideTag = document.getElementById('w11-guide-tag');
     const guideTitle = document.getElementById('w11-guide-title');
@@ -283,14 +335,14 @@ window.TIMSS_LABS['W11'] = {
 
     if (!this.state.counted) {
       guideTag.className = 'guide-step-tag';
-      guideTag.innerText = '👨‍🏫 老師引導 ➔ 第 1 步 / 共 2 步';
-      guideText.innerHTML = `小明下戰書說：<strong>「周界都是 16cm 的長方形，面積肯定一樣！」</strong>選手 A 與 B 的周界都是 16cm。請全班猜測面積真的一樣嗎？請操作員點擊上方<strong>「📐 數格子計算面積」</strong>！`;
+      guideTag.innerText = this.state.mission === 'extend' ? '🚀 資優極值 ➔ 第 1 步：猜測面積' : '👨‍🏫 老師引導 ➔ 第 1 步 / 共 2 步';
+      guideText.innerHTML = `周界都是 <strong>${a.P} cm</strong>。選手 A (${a.L}×${a.W}) vs 選手 B (${b.L}×${b.W})。請全班猜測面積真的一樣嗎？請操作員點擊上方<strong>「📐 數格子計算面積」</strong>！`;
       guideSub.innerText = '💡 目前面積處於隱藏待數狀態，請讓全班先大膽猜測。';
     } else if (!this.state.smashed) {
       if (a.A !== b.A) {
         guideTag.className = 'guide-step-tag step-alert';
         guideTag.innerText = '🥊 老師引導 ➔ 反例鐵證如山！';
-        guideText.innerHTML = `數格子發現：選手 A 面積為 <strong>${a.A} cm²</strong>，選手 B 面積高達 <strong>${b.A} cm²</strong>！<strong>${a.A} ≠ ${b.A}</strong>！反例成立！請操作員點擊上方<strong>「🔨 蓋章粉碎小明戰書！」</strong>！`;
+        guideText.innerHTML = `數格子發現：選手 A 面積為 <strong>${a.A} cm²</strong>，選手 B 面積為 <strong>${b.A} cm²</strong>！<strong>${a.A} ≠ ${b.A}</strong>！反例成立！請操作員點擊上方<strong>「🔨 蓋章粉碎小明戰書！」</strong>！`;
         guideSub.innerText = '💡 請全班一起高呼擊碎戰書，體會反例論證的力量！';
       } else {
         guideTag.className = 'guide-step-tag step-alert';
@@ -301,7 +353,7 @@ window.TIMSS_LABS['W11'] = {
     } else {
       guideTag.className = 'guide-step-tag step-done';
       guideTag.innerText = '💥 戰書徹底粉碎！反例構造法大獲全勝！';
-      guideText.innerHTML = `<strong>反例成立，戰書徹底擊碎！</strong>選手 A 與 B 周界完全相同（都是 16cm），但面積分別為 <strong>${a.A} cm²</strong> 與 <strong>${b.A} cm²</strong>！在科學論證中，<strong>只需 1 個反例</strong>就能推翻偽命題！`;
+      guideText.innerHTML = `<strong>反例成立，戰書徹底擊碎！</strong>周界都是 ${a.P}cm，面積分別為 <strong>${a.A} cm²</strong> 與 <strong>${b.A} cm²</strong>！${this.state.mission === 'extend' ? '更驗證了奧數極值定理：<strong>周界相等時，長寬越接近面積越大，正方形面積達到頂峰 (36 cm²)！</strong>' : '在科學論證中，<strong>只需 1 個反例</strong>就能推翻偽命題！'}`;
       guideSub.innerText = '🎯 教師金句：一個反例破偽命，長寬越近面越大！';
     }
 

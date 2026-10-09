@@ -1,6 +1,6 @@
 /**
  * lab03.js - 第 3 週：【魔術折紙與雙尺滑行】 (LAB-W03-MG-LINE) - iPad 優化版
- * 教師引導 ➔ 學生主動探究 ➔ 任務切換立即歸零待測
+ * 教師引導 ➔ 學生主動探究 ➔ 任務切換立即歸零待測 ➔ 資優延伸探究 (間距自訂與手滑反例檢測)
  */
 
 window.TIMSS_LABS = window.TIMSS_LABS || {};
@@ -9,24 +9,26 @@ window.TIMSS_LABS['W03'] = {
   id: 'W03',
   code: 'LAB-W03-MG-LINE',
   title: '魔術折紙與雙尺滑行',
-  domain: '測量與幾何 M&G',
-  domainType: 'mg',
-  cognitive: '知識 Knowing',
-  question: '兩條傾斜的鐵軌看起來斜斜的，怎麼向小明證明它們無限延長真的永遠不會相撞？折紙怎樣生出直角？',
-  activeRole: '🔴 操作員(D) 滑動三角板 ➔ 🟣 質疑員(A) 旋轉傾角驗證不相交',
+  domain: '測量與幾何 Measurement & Geometry',
+  domainType: 'geometry',
+  cognitive: '推理 Reasoning',
+  question: '如何不量角度就畫出兩條「處處等距」的平行線？一張不規則的廢紙，如何透過兩次對折折出嚴格的 90° 直角？',
+  activeRole: '🔴 操作員(D) 滑動平移三角板 ➔ 🟢 發言人(B) 解釋處處等距',
 
   state: {
-    mission: 'ruler', // 'ruler', 'origami'
+    mission: 'ruler', // 'ruler', 'origami', 'extend'
     angle: 20,
-    pos: 100, // 初始在最左邊起點
+    pos: 100,
     line2Drawn: false,
     calipersShown: false,
-    origamiStep: 0
+    origamiStep: 0,
+    customDist: 4.5,
+    wobble: false
   },
 
   getTeacherSummary() {
     return {
-      core: `<h4>💡 核心概念提煉</h4><p><strong>平行（∥）</strong>的本質特徵是：同一平面內兩直線之間的垂直距離<strong>處處相等</strong>，向兩端無限延伸永不相交。無論線條是水平、豎直還是傾斜，只要間距固定就是平行！<strong>垂直（⊥）</strong>的本質特徵是兩線相交夾角為 <strong>90°（直角）</strong>，折紙利用平角 180° 對折平分即可得到標準直角。</p>`,
+      core: `<h4>💡 核心概念提煉</h4><p>「<strong>平行</strong>」的本質是同一平面內兩條直線「<strong>處處等距、永不相交</strong>」。透過固定底尺、平移三角板，利用同位角相等原理能精準作平行線。若直尺未壓緊產生晃動，間距將不再相等。而「<strong>垂直</strong>」源於角平分，兩次對折將平角 $180^\\circ$ 均分，必定精準鎖定 $90^\\circ$ 直角。</p>`,
       formula: `<h4>📐 核心幾何判定與定理</h4><p>• <strong>平行判定：</strong>左、中、右垂直間距 $d_1 = d_2 = d_3 = 4.5\\text{ cm}$（處處等距）$\\implies L_1 \\parallel L_2$<br>• <strong>垂直判定：</strong>平角 $180^\\circ$ 經二次對折均分 $\\implies$ 夾角為 $90^\\circ \\implies L_1 \\perp L_2$</p>`,
       quote: `🎯 <strong>教師總結金句：</strong>「平不平行看距離，處處等距即平行，斜著也是平行線；兩次對折分平角，九十度角定垂直！」`
     };
@@ -40,7 +42,9 @@ window.TIMSS_LABS['W03'] = {
       pos: 100,
       line2Drawn: false,
       calipersShown: false,
-      origamiStep: 0
+      origamiStep: 0,
+      customDist: 4.5,
+      wobble: false
     };
 
     container.innerHTML = `
@@ -49,6 +53,7 @@ window.TIMSS_LABS['W03'] = {
         <div class="controls-left-group">
           <button class="touch-btn primary" id="w03-tab-ruler">📐 任務一：雙尺滑動平行線</button>
           <button class="touch-btn" id="w03-tab-origami">📄 任務二：魔術折紙生直角</button>
+          <button class="touch-btn" id="w03-tab-extend">🚀 任務三：資優延伸探究 (間距自訂與反例)</button>
         </div>
         <button class="touch-btn" id="w03-btn-reset">🔄 當前任務歸零待測</button>
       </div>
@@ -67,7 +72,25 @@ window.TIMSS_LABS['W03'] = {
         </div>
       </div>
 
-      <!-- 實驗一：雙尺滑動舞台 -->
+      <!-- 任務三專屬：資優延伸探究控制列 -->
+      <div id="w03-extend-controls" style="display:none; background:#f0fdf4; border:2px solid #86efac; border-radius:12px; padding:12px 16px; margin-bottom:12px;">
+        <div style="font-weight:bold; color:#166534; font-size:1rem; margin-bottom:8px;">
+          🚀 資優幾何實驗室：自訂軌道間距，或模擬「手滑未壓緊直尺」的反例挑戰：
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:16px; align-items:center;">
+          <div>
+            <label style="font-size:0.85rem; font-weight:bold; color:#15803d;">自訂軌道間距：</label>
+            <input type="range" id="w03-ext-slider-dist" min="20" max="80" step="5" value="45" style="vertical-align:middle; width:120px;">
+            <strong id="w03-ext-dist-val" style="color:#15803d; font-size:1rem;">4.5</strong> cm
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="touch-btn success" id="w03-ext-btn-tight">✅ 緊貼直尺 (保證平行)</button>
+            <button class="touch-btn danger" id="w03-ext-btn-wobble">⚠️ 模擬手滑 (偏轉 8° 反例)</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 實驗一與實驗三共用：雙尺滑動舞台 -->
       <div id="w03-view-ruler">
         <div class="ipad-controls-bar" style="background:#f8fafc; border-color:#e2e8f0;">
           <div style="display:flex; align-items:center; gap:8px;">
@@ -92,7 +115,7 @@ window.TIMSS_LABS['W03'] = {
               <g stroke="#854d0e" stroke-width="1.2">
                 ${Array.from({ length: 58 }, (_, i) => `<line x1="${60 + i * 10}" y1="210" x2="${60 + i * 10}" y2="${i % 5 === 0 ? 224 : 217}" />`).join('')}
               </g>
-              <text x="350" y="238" fill="#854d0e" font-size="13" font-weight="bold" text-anchor="middle">固定導向直尺 (緊壓在桌面上)</text>
+              <text x="350" y="238" fill="#854d0e" font-size="13" font-weight="bold" text-anchor="middle" id="w03-ruler-label">固定導向直尺 (緊壓在桌面上)</text>
 
               <!-- 平行鐵軌線 1 (基準線) -->
               <line x1="80" y1="120" x2="620" y2="120" stroke="#2563eb" stroke-width="4.5" stroke-linecap="round" />
@@ -100,23 +123,26 @@ window.TIMSS_LABS['W03'] = {
 
               <!-- 平行鐵軌線 2 (等待學生動手繪出) -->
               <g id="w03-line2-g" style="display:none;">
-                <line x1="80" y1="60" x2="620" y2="60" stroke="#059669" stroke-width="4.5" stroke-linecap="round" />
-                <text x="90" y="52" fill="#059669" font-size="12" font-weight="bold">鐵軌線 2 (沿平移三角板繪出)</text>
+                <line id="w03-l2-line" x1="80" y1="60" x2="620" y2="60" stroke="#059669" stroke-width="4.5" stroke-linecap="round" />
+                <text id="w03-l2-text" x="90" y="52" fill="#059669" font-size="12" font-weight="bold">鐵軌線 2 (沿平移三角板繪出)</text>
               </g>
 
               <!-- 三處等距卡尺 (等待學生動手呼叫) -->
               <g id="w03-calipers-g" style="display:none;">
-                <line x1="160" y1="60" x2="160" y2="120" stroke="#ef4444" stroke-width="2.5" stroke-dasharray="4,3" />
-                <rect x="135" y="80" width="50" height="22" rx="4" fill="#fee2e2" stroke="#ef4444" />
-                <text x="160" y="95" font-size="11" fill="#dc2626" font-weight="bold" text-anchor="middle">4.5 cm</text>
+                <!-- 左卡尺 -->
+                <line id="w03-c-line-1" x1="160" y1="60" x2="160" y2="120" stroke="#ef4444" stroke-width="2.5" stroke-dasharray="4,3" />
+                <rect id="w03-c-box-1" x="135" y="80" width="50" height="22" rx="4" fill="#fee2e2" stroke="#ef4444" />
+                <text id="w03-c-txt-1" x="160" y="95" font-size="11" fill="#dc2626" font-weight="bold" text-anchor="middle">4.5 cm</text>
 
-                <line x1="350" y1="60" x2="350" y2="120" stroke="#ef4444" stroke-width="2.5" stroke-dasharray="4,3" />
-                <rect x="325" y="80" width="50" height="22" rx="4" fill="#fee2e2" stroke="#ef4444" />
-                <text x="350" y="95" font-size="11" fill="#dc2626" font-weight="bold" text-anchor="middle">4.5 cm</text>
+                <!-- 中卡尺 -->
+                <line id="w03-c-line-2" x1="350" y1="60" x2="350" y2="120" stroke="#ef4444" stroke-width="2.5" stroke-dasharray="4,3" />
+                <rect id="w03-c-box-2" x="325" y="80" width="50" height="22" rx="4" fill="#fee2e2" stroke="#ef4444" />
+                <text id="w03-c-txt-2" x="350" y="95" font-size="11" fill="#dc2626" font-weight="bold" text-anchor="middle">4.5 cm</text>
 
-                <line x1="540" y1="60" x2="540" y2="120" stroke="#ef4444" stroke-width="2.5" stroke-dasharray="4,3" />
-                <rect x="515" y="80" width="50" height="22" rx="4" fill="#fee2e2" stroke="#ef4444" />
-                <text x="540" y="95" font-size="11" fill="#dc2626" font-weight="bold" text-anchor="middle">4.5 cm</text>
+                <!-- 右卡尺 -->
+                <line id="w03-c-line-3" x1="540" y1="60" x2="540" y2="120" stroke="#ef4444" stroke-width="2.5" stroke-dasharray="4,3" />
+                <rect id="w03-c-box-3" x="515" y="80" width="50" height="22" rx="4" fill="#fee2e2" stroke="#ef4444" />
+                <text id="w03-c-txt-3" x="540" y="95" font-size="11" fill="#dc2626" font-weight="bold" text-anchor="middle">4.5 cm</text>
               </g>
 
               <!-- 滑動三角板 -->
@@ -163,6 +189,8 @@ window.TIMSS_LABS['W03'] = {
       this.state.pos = 100;
       this.state.line2Drawn = false;
       this.state.calipersShown = false;
+      this.state.wobble = false;
+      this.state.customDist = 4.5;
       this.updateTabs('w03-tab-ruler');
       document.getElementById('w03-view-ruler').style.display = 'block';
       document.getElementById('w03-view-origami').style.display = 'none';
@@ -181,8 +209,21 @@ window.TIMSS_LABS['W03'] = {
       this.update();
     });
 
+    bind('w03-tab-extend', () => {
+      this.state.mission = 'extend';
+      this.state.pos = 100;
+      this.state.line2Drawn = false;
+      this.state.calipersShown = false;
+      this.state.wobble = false;
+      this.updateTabs('w03-tab-extend');
+      document.getElementById('w03-view-ruler').style.display = 'block';
+      document.getElementById('w03-view-origami').style.display = 'none';
+      window.soundFx.click();
+      this.update();
+    });
+
     bind('w03-btn-reset', () => {
-      if (this.state.mission === 'ruler') {
+      if (this.state.mission === 'ruler' || this.state.mission === 'extend') {
         this.state.pos = 100;
         this.state.line2Drawn = false;
         this.state.calipersShown = false;
@@ -254,10 +295,39 @@ window.TIMSS_LABS['W03'] = {
       this.updateOrigami();
       this.update();
     });
+
+    // 任務三延伸按鈕與滑桿
+    const distSlider = document.getElementById('w03-ext-slider-dist');
+    if (distSlider) {
+      distSlider.addEventListener('input', (e) => {
+        const val = (parseInt(e.target.value, 10) / 10).toFixed(1);
+        this.state.customDist = parseFloat(val);
+        document.getElementById('w03-ext-dist-val').innerText = val;
+        this.state.line2Drawn = false;
+        this.state.calipersShown = false;
+        this.update();
+      });
+    }
+
+    bind('w03-ext-btn-tight', () => {
+      this.state.wobble = false;
+      this.state.line2Drawn = false;
+      this.state.calipersShown = false;
+      window.soundFx.balanceChime();
+      this.update();
+    });
+
+    bind('w03-ext-btn-wobble', () => {
+      this.state.wobble = true;
+      this.state.line2Drawn = false;
+      this.state.calipersShown = false;
+      window.soundFx.tiltBuzz();
+      this.update();
+    });
   },
 
   updateTabs(activeId) {
-    ['w03-tab-ruler', 'w03-tab-origami'].forEach(id => {
+    ['w03-tab-ruler', 'w03-tab-origami', 'w03-tab-extend'].forEach(id => {
       const b = document.getElementById(id);
       if (b) {
         if (id === activeId) b.classList.add('primary');
@@ -272,6 +342,9 @@ window.TIMSS_LABS['W03'] = {
     const guideText = document.getElementById('w03-guide-text');
     const guideSub = document.getElementById('w03-guide-sub');
 
+    const extControls = document.getElementById('w03-extend-controls');
+    if (extControls) extControls.style.display = this.state.mission === 'extend' ? 'block' : 'none';
+
     // 三角板位置更新
     const tri = document.getElementById('w03-tri');
     if (tri) tri.setAttribute('transform', `translate(${this.state.pos}, 0)`);
@@ -281,6 +354,46 @@ window.TIMSS_LABS['W03'] = {
 
     const c = document.getElementById('w03-calipers-g');
     if (c) c.style.display = this.state.calipersShown ? 'block' : 'none';
+
+    // 任務三或反例動態幾何計算
+    const gapPx = (this.state.customDist || 4.5) * 13.33; // 4.5cm -> 60px
+    const y2_left = this.state.wobble ? 120 - gapPx + 16 : 120 - gapPx;
+    const y2_right = this.state.wobble ? 120 - gapPx - 20 : 120 - gapPx;
+
+    const l2Line = document.getElementById('w03-l2-line');
+    if (l2Line) {
+      l2Line.setAttribute('y1', y2_left);
+      l2Line.setAttribute('y2', y2_right);
+      l2Line.setAttribute('stroke', this.state.wobble ? '#dc2626' : '#059669');
+    }
+
+    // 卡尺數值更新
+    const dLeft = this.state.wobble ? (this.state.customDist - 1.2).toFixed(1) : this.state.customDist.toFixed(1);
+    const dMid = this.state.customDist.toFixed(1);
+    const dRight = this.state.wobble ? (this.state.customDist + 1.5).toFixed(1) : this.state.customDist.toFixed(1);
+
+    const txt1 = document.getElementById('w03-c-txt-1');
+    const txt2 = document.getElementById('w03-c-txt-2');
+    const txt3 = document.getElementById('w03-c-txt-3');
+    const box1 = document.getElementById('w03-c-box-1');
+    const box2 = document.getElementById('w03-c-box-2');
+    const box3 = document.getElementById('w03-c-box-3');
+
+    if (txt1) txt1.textContent = `${dLeft} cm`;
+    if (txt2) txt2.textContent = `${dMid} cm`;
+    if (txt3) txt3.textContent = `${dRight} cm`;
+
+    const cColor = this.state.wobble ? '#ef4444' : '#059669';
+    const cBg = this.state.wobble ? '#fee2e2' : '#dcfce7';
+    [box1, box2, box3].forEach(b => {
+      if (b) {
+        b.setAttribute('fill', cBg);
+        b.setAttribute('stroke', cColor);
+      }
+    });
+    [txt1, txt2, txt3].forEach(t => {
+      if (t) t.setAttribute('fill', cColor);
+    });
 
     if (this.state.mission === 'ruler') {
       guideTitle.innerText = '任務一：雙尺滑動平行線';
@@ -307,7 +420,7 @@ window.TIMSS_LABS['W03'] = {
         guideSub.innerText = '🎯 教師金句：平不平行看距離，處處等距即平行，斜著也是平行線！';
       }
 
-    } else {
+    } else if (this.state.mission === 'origami') {
       guideTitle.innerText = '任務二：魔術折紙生直角';
 
       if (this.state.origamiStep === 0) {
@@ -330,6 +443,31 @@ window.TIMSS_LABS['W03'] = {
         guideTag.innerText = '🎉 探究結論 ➔ 360° ÷ 4 ＝ 90°！';
         guideText.innerHTML = `<strong>十字折痕完美相交於 90° 直角！</strong>兩次對折將一週 360° 均分為 4 份，折出來必是百分之百的直角與垂直線！`;
         guideSub.innerText = '🎯 教師金句：兩次對折分平角，九十度角定垂直！';
+      }
+
+    } else if (this.state.mission === 'extend') {
+      guideTitle.innerText = '任務三：資優延伸探究 (間距自訂與反例檢測)';
+
+      if (!this.state.line2Drawn) {
+        guideTag.className = 'guide-step-tag';
+        guideTag.innerText = '🚀 資優探究 ➔ 畫線待測';
+        guideText.innerHTML = `當前設定間距：<strong>${this.state.customDist} cm</strong>。請操作員點擊上方<strong>「✏️ 沿邊畫第二條鐵軌」</strong>，再用卡尺檢驗！`;
+        guideSub.innerText = this.state.wobble ? '⚠️ 目前處於手滑偏轉模式，觀察畫出來的線會怎樣！' : '✅ 目前處於嚴格緊貼模式。';
+      } else if (!this.state.calipersShown) {
+        guideTag.className = 'guide-step-tag step-alert';
+        guideTag.innerText = '🚀 資優探究 ➔ 待量間距';
+        guideText.innerHTML = `線段已繪出！請點擊上方<strong>「📏 卡尺測量間距」</strong>，檢驗三處垂直距離是否處處相等！`;
+        guideSub.innerText = '💡 請學生觀察兩條線是否真正平行。';
+      } else if (!this.state.wobble) {
+        guideTag.className = 'guide-step-tag step-done';
+        guideTag.innerText = '🎉 平行公理驗證成立！';
+        guideText.innerHTML = `<strong>處處等距 ${this.state.customDist} cm！</strong>無論設定間距多寬、直尺旋轉多少角度，只要緊貼直尺平移，兩線永不相交！`;
+        guideSub.innerText = '💡 試著點擊上方「⚠️ 模擬手滑」按鈕，看看會發生什麼！';
+      } else {
+        guideTag.className = 'guide-step-tag step-alert';
+        guideTag.innerText = '💥 反例警報：間距不相等！';
+        guideText.innerHTML = `<strong>直尺晃動導致平行破壞！</strong>左端間距 <strong>${dLeft} cm</strong> ≠ 右端間距 <strong>${dRight} cm</strong>！延長後必在左側相交！這正是雙尺作圖必須「一手壓緊底尺、一手緊貼推移」的科學理由！`;
+        guideSub.innerText = '🎯 深刻理解平行線判定：處處等距才平行！';
       }
     }
 

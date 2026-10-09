@@ -1,6 +1,6 @@
 /**
  * lab01.js - 第 1 週：【百萬位值拼擺天平】 (LAB-W01-N-PV) - iPad 優化版
- * 教師引導 ➔ 學生主動探究 ➔ 任務切換立即歸零待測
+ * 教師引導 ➔ 學生主動探究 ➔ 任務切換立即歸零待測 ➔ 資優延伸探究 (跨數位自由 PK 實驗室)
  */
 
 window.TIMSS_LABS = window.TIMSS_LABS || {};
@@ -16,9 +16,13 @@ window.TIMSS_LABS['W01'] = {
   activeRole: '🔴 操作員(D) 主導天平砝碼 ➔ 🟣 質疑員(A) 挑戰 0 的作用',
 
   state: {
-    mission: 'task1', // 'task1', 'task2', 'task3'
+    mission: 'task1', // 'task1', 'task2', 'task3', 'task4'
     left1k: 0,
     right10k: 0,
+    leftUnit: 1000,
+    rightUnit: 10000,
+    leftUnitName: '千位 (1,000g)',
+    rightUnitName: '萬位 (10,000g)',
     zeroGuard: true
   },
 
@@ -33,7 +37,16 @@ window.TIMSS_LABS['W01'] = {
   render(container) {
     this.container = container;
     // 進入時完全歸零
-    this.state = { mission: 'task1', left1k: 0, right10k: 0, zeroGuard: true };
+    this.state = {
+      mission: 'task1',
+      left1k: 0,
+      right10k: 0,
+      leftUnit: 1000,
+      rightUnit: 10000,
+      leftUnitName: '千位 (1,000g)',
+      rightUnitName: '萬位 (10,000g)',
+      zeroGuard: true
+    };
 
     container.innerHTML = `
       <!-- 任務切換列：點擊任何任務立即歸零 -->
@@ -42,6 +55,7 @@ window.TIMSS_LABS['W01'] = {
           <button class="touch-btn primary" id="w01-tab-t1">🎯 任務一：千位 9 vs 萬位 1</button>
           <button class="touch-btn" id="w01-tab-t2">📖 任務二：課本題 (千位 2 vs 萬位 3)</button>
           <button class="touch-btn" id="w01-tab-t3">🛡️ 任務三：0 號守衛城堡實驗</button>
+          <button class="touch-btn" id="w01-tab-t4">🚀 任務四：資優延伸探究 (跨數位PK)</button>
         </div>
         <button class="touch-btn" id="w01-btn-reset">🔄 當前任務歸零待測</button>
       </div>
@@ -60,6 +74,37 @@ window.TIMSS_LABS['W01'] = {
         </div>
       </div>
 
+      <!-- 任務四專屬：資優延伸探究控制列 -->
+      <div id="w01-extend-controls" style="display:none; background:#f0fdf4; border:2px solid #86efac; border-radius:12px; padding:12px 16px; margin-bottom:12px;">
+        <div style="font-weight:bold; color:#166534; font-size:1rem; margin-bottom:8px;">
+          🚀 資優跨數位對抗實驗室：自選任意兩數位單位，或挑選奧數經典對決：
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:10px;">
+          <button class="touch-btn primary" id="w01-ext-btn-a">🏆 挑戰 A：7 個十萬 (700,000) vs 9 個萬 (90,000)</button>
+          <button class="touch-btn" id="w01-ext-btn-b">🏆 挑戰 B：25 個萬 (250,000) vs 3 個十萬 (300,000)</button>
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; background:#fff; padding:10px; border-radius:8px; border:1px solid #bbf7d0;">
+          <div>
+            <label style="font-size:0.85rem; font-weight:bold; color:#15803d;">自選左盤計數單位：</label>
+            <select id="w01-sel-l-unit" style="padding:4px 8px; border-radius:6px; border:1.5px solid #86efac; font-weight:bold; color:#15803d; width:100%;">
+              <option value="100">百位 (100g)</option>
+              <option value="1000" selected>千位 (1,000g)</option>
+              <option value="10000">萬位 (10,000g)</option>
+              <option value="100000">十萬位 (100,000g)</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:0.85rem; font-weight:bold; color:#7c3aed;">自選右盤計數單位：</label>
+            <select id="w01-sel-r-unit" style="padding:4px 8px; border-radius:6px; border:1.5px solid #c4b5fd; font-weight:bold; color:#7c3aed; width:100%;">
+              <option value="1000">千位 (1,000g)</option>
+              <option value="10000" selected>萬位 (10,000g)</option>
+              <option value="100000">十萬位 (100,000g)</option>
+              <option value="1000000">百萬位 (1,000,000g)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
       <!-- 大天平視覺區 -->
       <div class="big-balance-wrapper">
         <svg class="big-balance-svg" viewBox="0 0 680 380">
@@ -73,11 +118,11 @@ window.TIMSS_LABS['W01'] = {
             <rect x="90" y="144" width="500" height="12" rx="5" fill="#64748b" />
             <circle cx="340" cy="150" r="10" fill="#1e293b" />
             
-            <!-- 左吊盤 (千位) -->
+            <!-- 左吊盤 -->
             <line x1="140" y1="150" x2="140" y2="230" stroke="#94a3b8" stroke-width="2.5" />
             <ellipse cx="140" cy="235" rx="75" ry="16" fill="#cbd5e1" stroke="#64748b" stroke-width="2.5" />
             
-            <!-- 右吊盤 (萬位) -->
+            <!-- 右吊盤 -->
             <line x1="540" y1="150" x2="540" y2="230" stroke="#94a3b8" stroke-width="2.5" />
             <ellipse cx="540" cy="235" rx="75" ry="16" fill="#cbd5e1" stroke="#64748b" stroke-width="2.5" />
             
@@ -94,7 +139,7 @@ window.TIMSS_LABS['W01'] = {
       <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-top:14px;" id="w01-steppers-area">
         <div style="background:#eff6ff; border:2px solid #bfdbfe; border-radius:12px; padding:12px; display:flex; align-items:center; justify-content:space-between;">
           <div>
-            <strong style="color:#1d4ed8; font-size:1rem;">🔵 左盤：千位砝碼 (每個 1,000g)</strong>
+            <strong style="color:#1d4ed8; font-size:1rem;" id="w01-l-unit-title">🔵 左盤：千位砝碼 (每個 1,000g)</strong>
             <div style="font-size:0.85rem; color:#64748b;">盤上數量：<span id="w01-l-cnt" style="font-weight:bold; color:#1d4ed8;">0</span> 個 ｜ 總重：<strong id="w01-l-tot" style="color:#1d4ed8; font-size:1.15rem;">0</strong> g</div>
           </div>
           <div class="ipad-stepper">
@@ -106,7 +151,7 @@ window.TIMSS_LABS['W01'] = {
 
         <div style="background:#f5f3ff; border:2px solid #ddd6fe; border-radius:12px; padding:12px; display:flex; align-items:center; justify-content:space-between;">
           <div>
-            <strong style="color:#7c3aed; font-size:1rem;">🟣 右盤：萬位砝碼 (每個 10,000g)</strong>
+            <strong style="color:#7c3aed; font-size:1rem;" id="w01-r-unit-title">🟣 右盤：萬位砝碼 (每個 10,000g)</strong>
             <div style="font-size:0.85rem; color:#64748b;">盤上數量：<span id="w01-r-cnt" style="font-weight:bold; color:#7c3aed;">0</span> 個 ｜ 總重：<strong id="w01-r-tot" style="color:#7c3aed; font-size:1.15rem;">0</strong> g</div>
           </div>
           <div class="ipad-stepper">
@@ -144,22 +189,69 @@ window.TIMSS_LABS['W01'] = {
 
     // 任務切換：一律歸零待測！
     bind('w01-tab-t1', () => {
-      this.state = { mission: 'task1', left1k: 0, right10k: 0, zeroGuard: true };
+      this.state = {
+        mission: 'task1',
+        left1k: 0,
+        right10k: 0,
+        leftUnit: 1000,
+        rightUnit: 10000,
+        leftUnitName: '千位 (1,000g)',
+        rightUnitName: '萬位 (10,000g)',
+        zeroGuard: true
+      };
       this.updateTabs('w01-tab-t1');
       window.soundFx.click();
       this.update();
     });
 
     bind('w01-tab-t2', () => {
-      this.state = { mission: 'task2', left1k: 0, right10k: 0, zeroGuard: true };
+      this.state = {
+        mission: 'task2',
+        left1k: 0,
+        right10k: 0,
+        leftUnit: 1000,
+        rightUnit: 10000,
+        leftUnitName: '千位 (1,000g)',
+        rightUnitName: '萬位 (10,000g)',
+        zeroGuard: true
+      };
       this.updateTabs('w01-tab-t2');
       window.soundFx.click();
       this.update();
     });
 
     bind('w01-tab-t3', () => {
-      this.state = { mission: 'task3', left1k: 0, right10k: 0, zeroGuard: true };
+      this.state = {
+        mission: 'task3',
+        left1k: 0,
+        right10k: 0,
+        leftUnit: 1000,
+        rightUnit: 10000,
+        leftUnitName: '千位 (1,000g)',
+        rightUnitName: '萬位 (10,000g)',
+        zeroGuard: true
+      };
       this.updateTabs('w01-tab-t3');
+      window.soundFx.click();
+      this.update();
+    });
+
+    bind('w01-tab-t4', () => {
+      this.state = {
+        mission: 'task4',
+        left1k: 0,
+        right10k: 0,
+        leftUnit: 100000,
+        rightUnit: 10000,
+        leftUnitName: '十萬位 (100,000g)',
+        rightUnitName: '萬位 (10,000g)',
+        zeroGuard: true
+      };
+      const lSel = document.getElementById('w01-sel-l-unit');
+      const rSel = document.getElementById('w01-sel-r-unit');
+      if (lSel) lSel.value = '100000';
+      if (rSel) rSel.value = '10000';
+      this.updateTabs('w01-tab-t4');
       window.soundFx.click();
       this.update();
     });
@@ -174,7 +266,7 @@ window.TIMSS_LABS['W01'] = {
 
     // 步進按鈕
     bind('w01-l-add', () => {
-      if (this.state.left1k < 15) {
+      if (this.state.left1k < 30) {
         this.state.left1k++;
         window.soundFx.click();
         this.update();
@@ -189,7 +281,7 @@ window.TIMSS_LABS['W01'] = {
     });
 
     bind('w01-r-add', () => {
-      if (this.state.right10k < 5) {
+      if (this.state.right10k < 30) {
         this.state.right10k++;
         window.soundFx.click();
         this.update();
@@ -213,10 +305,60 @@ window.TIMSS_LABS['W01'] = {
       }
       this.update();
     });
+
+    // 任務四延伸按鈕
+    bind('w01-ext-btn-a', () => {
+      this.state.leftUnit = 100000;
+      this.state.rightUnit = 10000;
+      this.state.leftUnitName = '十萬位 (100,000g)';
+      this.state.rightUnitName = '萬位 (10,000g)';
+      this.state.left1k = 0;
+      this.state.right10k = 0;
+      const lSel = document.getElementById('w01-sel-l-unit');
+      const rSel = document.getElementById('w01-sel-r-unit');
+      if (lSel) lSel.value = '100000';
+      if (rSel) rSel.value = '10000';
+      window.soundFx.click();
+      this.update();
+    });
+
+    bind('w01-ext-btn-b', () => {
+      this.state.leftUnit = 10000;
+      this.state.rightUnit = 100000;
+      this.state.leftUnitName = '萬位 (10,000g)';
+      this.state.rightUnitName = '十萬位 (100,000g)';
+      this.state.left1k = 0;
+      this.state.right10k = 0;
+      const lSel = document.getElementById('w01-sel-l-unit');
+      const rSel = document.getElementById('w01-sel-r-unit');
+      if (lSel) lSel.value = '10000';
+      if (rSel) rSel.value = '100000';
+      window.soundFx.click();
+      this.update();
+    });
+
+    const lSel = document.getElementById('w01-sel-l-unit');
+    const rSel = document.getElementById('w01-sel-r-unit');
+    if (lSel) {
+      lSel.addEventListener('change', (e) => {
+        this.state.leftUnit = parseInt(e.target.value, 10);
+        this.state.leftUnitName = e.target.options[e.target.selectedIndex].text;
+        this.state.left1k = 0;
+        this.update();
+      });
+    }
+    if (rSel) {
+      rSel.addEventListener('change', (e) => {
+        this.state.rightUnit = parseInt(e.target.value, 10);
+        this.state.rightUnitName = e.target.options[e.target.selectedIndex].text;
+        this.state.right10k = 0;
+        this.update();
+      });
+    }
   },
 
   updateTabs(activeId) {
-    ['w01-tab-t1', 'w01-tab-t2', 'w01-tab-t3'].forEach(id => {
+    ['w01-tab-t1', 'w01-tab-t2', 'w01-tab-t3', 'w01-tab-t4'].forEach(id => {
       const b = document.getElementById(id);
       if (b) {
         if (id === activeId) b.classList.add('primary');
@@ -226,8 +368,10 @@ window.TIMSS_LABS['W01'] = {
   },
 
   update() {
-    const lTot = this.state.left1k * 1000;
-    const rTot = this.state.right10k * 10000;
+    const lUnit = this.state.leftUnit || 1000;
+    const rUnit = this.state.rightUnit || 10000;
+    const lTot = this.state.left1k * lUnit;
+    const rTot = this.state.right10k * rUnit;
 
     document.getElementById('w01-l-val').innerText = this.state.left1k;
     document.getElementById('w01-l-cnt').innerText = this.state.left1k;
@@ -237,11 +381,15 @@ window.TIMSS_LABS['W01'] = {
     document.getElementById('w01-r-cnt').innerText = this.state.right10k;
     document.getElementById('w01-r-tot').innerText = rTot.toLocaleString();
 
+    document.getElementById('w01-l-unit-title').innerText = `🔵 左盤：${this.state.leftUnitName || '千位 (1,000g)'}`;
+    document.getElementById('w01-r-unit-title').innerText = `🟣 右盤：${this.state.rightUnitName || '萬位 (10,000g)'}`;
+
     // 角度計算
     const diff = rTot - lTot;
     let angle = 0;
     if (diff !== 0) {
-      angle = Math.max(-15, Math.min(15, (diff / 1000) * 1.5));
+      const maxVal = Math.max(lTot, rTot, 10000);
+      angle = Math.max(-15, Math.min(15, (diff / maxVal) * 15));
     }
 
     const beam = document.getElementById('w01-beam');
@@ -255,8 +403,10 @@ window.TIMSS_LABS['W01'] = {
     }
 
     // 渲染堆疊砝碼
-    this.renderWeights('w01-left-g', 140, angle, this.state.left1k, '#3b82f6', '1k');
-    this.renderWeights('w01-right-g', 540, -angle, this.state.right10k, '#8b5cf6', '10k');
+    const lLabel = lUnit >= 1000000 ? '1M' : lUnit >= 100000 ? '100k' : lUnit >= 10000 ? '10k' : lUnit >= 1000 ? '1k' : '100';
+    const rLabel = rUnit >= 1000000 ? '1M' : rUnit >= 100000 ? '100k' : rUnit >= 10000 ? '10k' : rUnit >= 1000 ? '1k' : '100';
+    this.renderWeights('w01-left-g', 140, angle, this.state.left1k, '#3b82f6', lLabel);
+    this.renderWeights('w01-right-g', 540, -angle, this.state.right10k, '#8b5cf6', rLabel);
 
     // 根據任務模式動態更新「老師引導 ➔ 學生探究」
     const guideTag = document.getElementById('w01-guide-tag');
@@ -265,6 +415,9 @@ window.TIMSS_LABS['W01'] = {
     const guideSub = document.getElementById('w01-guide-sub');
     const zeroPanel = document.getElementById('w01-zero-panel');
     const steppersArea = document.getElementById('w01-steppers-area');
+    const extControls = document.getElementById('w01-extend-controls');
+
+    if (extControls) extControls.style.display = this.state.mission === 'task4' ? 'block' : 'none';
 
     if (this.state.mission === 'task1') {
       zeroPanel.style.display = 'none';
@@ -352,6 +505,32 @@ window.TIMSS_LABS['W01'] = {
             <div style="text-align:center;"><div style="background:#fef9c3; padding:6px 14px; border-radius:6px; color:#a16207;">0</div><span style="font-size:0.75rem; color:#64748b;">個位</span></div>
           `;
         }
+      }
+    } else if (this.state.mission === 'task4') {
+      zeroPanel.style.display = 'none';
+      steppersArea.style.display = 'grid';
+      guideTitle.innerText = `任務四：資優延伸探究 (${this.state.leftUnitName} vs ${this.state.rightUnitName})`;
+
+      if (this.state.left1k === 0 && this.state.right10k === 0) {
+        guideTag.className = 'guide-step-tag';
+        guideTag.innerText = '🚀 資優探究 ➔ 初始歸零待測';
+        guideText.innerHTML = `請選擇上方預設挑戰或自由選配單位，然後使用 ＋ 按鈕為左右盤添加砝碼，探究位值對抗！`;
+        guideSub.innerText = '💡 天平兩邊目前為 0g，請由學生親自動手按 ＋ 號操作。';
+      } else if (lTot === rTot) {
+        guideTag.className = 'guide-step-tag step-done';
+        guideTag.innerText = '⚖️ 驚人平衡！位值守恆';
+        guideText.innerHTML = `<strong>天平竟然完全平衡了！</strong>左邊 ${this.state.left1k} 個 ${this.state.leftUnitName} (${lTot.toLocaleString()}g) ＝ 右邊 ${this.state.right10k} 個 ${this.state.rightUnitName} (${rTot.toLocaleString()}g)！`;
+        guideSub.innerText = '🎯 體會低數位靠數量累積，可以追平高數位的震撼原理！';
+      } else if (lTot > rTot) {
+        guideTag.className = 'guide-step-tag step-alert';
+        guideTag.innerText = '🔵 左盤勝出！';
+        guideText.innerHTML = `左盤總重 <strong>${lTot.toLocaleString()}g</strong> ＞ 右盤總重 <strong>${rTot.toLocaleString()}g</strong>！差距 <strong>${(lTot - rTot).toLocaleString()}g</strong>！`;
+        guideSub.innerText = '💡 想想看，右邊還要加幾個砝碼才能反超？';
+      } else {
+        guideTag.className = 'guide-step-tag step-alert';
+        guideTag.innerText = '🟣 右盤勝出！';
+        guideText.innerHTML = `右盤總重 <strong>${rTot.toLocaleString()}g</strong> ＞ 左盤總重 <strong>${lTot.toLocaleString()}g</strong>！差距 <strong>${(rTot - lTot).toLocaleString()}g</strong>！`;
+        guideSub.innerText = '💡 想想看，左邊還要加幾個砝碼才能平衡？';
       }
     }
 

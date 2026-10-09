@@ -1,6 +1,6 @@
 /**
  * lab06.js - 第 6 週：【毛線籬笆變形記】 (LAB-W06-MG-PER) - iPad 優化版
- * 教師引導 ➔ 學生主動探究 ➔ 任務切換立即歸零待測
+ * 教師引導 ➔ 學生主動探究 ➔ 任務切換立即歸零待測 ➔ 資優延伸探究 (轉角兩面靠牆與自訂長寬)
  */
 
 window.TIMSS_LABS = window.TIMSS_LABS || {};
@@ -9,14 +9,14 @@ window.TIMSS_LABS['W06'] = {
   id: 'W06',
   code: 'LAB-W06-MG-PER',
   title: '毛線籬笆變形記',
-  domain: '測量與幾何 M&G',
-  domainType: 'mg',
+  domain: '測量與幾何 Measurement & Geometry',
+  domainType: 'geometry',
   cognitive: '應用 Applying',
-  question: '農場長 12cm、寬 8cm。四面圍籬笆要 40cm 毛線。若其中一條長邊靠磚牆，或留 3cm 大門，毛線要剪掉多少？',
-  activeRole: '🔴 操作員(D) 調整農場尺寸 ➔ 🟣 質疑員(A) 挑戰靠牆周界變化',
+  question: '一個長 12cm、寬 8cm 的長方形農場，如果有一邊靠著磚牆，或者要留一道 3cm 的大門，圍一週的籬笆長度會如何變化？',
+  activeRole: '🔴 操作員(D) 切換農場邊界條件 ➔ 🟢 發言人(B) 說明扣除的道理',
 
   state: {
-    mission: 'full', // 'full', 'wall', 'gate', 'wall_gate'
+    mission: 'full', // 'full', 'wall', 'gate', 'wall_gate', 'corner'
     length: 12,
     width: 8,
     fenceDeployed: false
@@ -29,9 +29,10 @@ window.TIMSS_LABS['W06'] = {
     const wallVal = full - L;
     const gateVal = full - 3;
     const bothVal = full - L - 3;
+    const cornerVal = L + W;
     return {
       core: `<h4>💡 核心概念提煉</h4><p>周界的數學定義是「<strong>封閉圖形一週邊線的長度總和</strong>」。但在真實籬笆工程中，必須考慮實際邊界條件：現成的牆壁可充當天然屏障（<strong>靠牆邊無需圍籬</strong>），大門是出入通道（<strong>留門處必須扣除</strong>）。動態周界計算體現了數學模型與生活工程的完美結合！</p>`,
-      formula: `<h4>📐 核心工程算式與扣除法</h4><p>• <strong>四面封閉總周界：</strong>$(${L} + ${W}) \\times 2 = \\mathbf{${full}\\text{ cm}}$<br>• <strong>長邊靠牆籬笆長：</strong>${full} − ${L} = \\mathbf{${wallVal}\\text{ cm}}$（節省 1 條長邊）<br>• <strong>開闢 3cm 門籬笆長：</strong>${full} − 3 = \\mathbf{${gateVal}\\text{ cm}}$ ｜ <strong>雙重扣減：</strong>${full} − ${L} − 3 = \\mathbf{${bothVal}\\text{ cm}}$</p>`,
+      formula: `<h4>📐 核心工程算式與扣除法</h4><p>• <strong>四面封閉總周界：</strong>$(${L} + ${W}) \\times 2 = \\mathbf{${full}\\text{ cm}}$<br>• <strong>長邊靠牆籬笆長：</strong>${full} − ${L} = \\mathbf{${wallVal}\\text{ cm}}$（節省 1 條長邊）<br>• <strong>開闢 3cm 門籬笆長：</strong>${full} − 3 = \\mathbf{${gateVal}\\text{ cm}}$ ｜ <strong>雙重扣減：</strong>${full} − ${L} − 3 = \\mathbf{${bothVal}\\text{ cm}}$<br>• <strong>轉角兩面靠牆：</strong>$${L} + ${W} = \\mathbf{${cornerVal}\\text{ cm}}$（節省整整一半！）</p>`,
       quote: `🎯 <strong>教師總結金句：</strong>「周界本是繞一週，靠牆省下一條邊；留門剪出進出路，扣除無須圍線段！」`
     };
   },
@@ -45,9 +46,10 @@ window.TIMSS_LABS['W06'] = {
       <div class="ipad-controls-bar">
         <div class="controls-left-group">
           <button class="touch-btn primary" id="w06-tab-full">🏞️ 任務一：四面全圍籬笆</button>
-          <button class="touch-btn" id="w06-tab-wall">🧱 任務二：長邊改靠現成磚牆</button>
-          <button class="touch-btn" id="w06-tab-gate">🚪 任務三：底邊開闢 3cm 大門</button>
-          <button class="touch-btn" id="w06-tab-both">⭐ 任務四：靠牆 ＋ 留門雙重組合</button>
+          <button class="touch-btn" id="w06-tab-wall">🧱 任務二：長邊靠磚牆</button>
+          <button class="touch-btn" id="w06-tab-gate">🚪 任務三：底邊開 3cm 門</button>
+          <button class="touch-btn" id="w06-tab-both">⭐ 任務四：靠牆＋留門雙重組合</button>
+          <button class="touch-btn" id="w06-tab-corner">🚀 任務五：資優延伸探究 (轉角兩面靠牆)</button>
         </div>
         <button class="touch-btn" id="w06-btn-reset">🔄 當前任務歸零待測</button>
       </div>
@@ -130,6 +132,14 @@ window.TIMSS_LABS['W06'] = {
       this.update();
     });
 
+    bind('w06-tab-corner', () => {
+      this.state.mission = 'corner';
+      this.state.fenceDeployed = false;
+      this.updateTabs('w06-tab-corner');
+      window.soundFx.click();
+      this.update();
+    });
+
     bind('w06-btn-reset', () => {
       this.state.fenceDeployed = false;
       window.soundFx.click();
@@ -161,7 +171,7 @@ window.TIMSS_LABS['W06'] = {
   },
 
   updateTabs(activeId) {
-    ['w06-tab-full', 'w06-tab-wall', 'w06-tab-gate', 'w06-tab-both'].forEach(id => {
+    ['w06-tab-full', 'w06-tab-wall', 'w06-tab-gate', 'w06-tab-both', 'w06-tab-corner'].forEach(id => {
       const b = document.getElementById(id);
       if (b) {
         if (id === activeId) b.classList.add('primary');
@@ -179,61 +189,91 @@ window.TIMSS_LABS['W06'] = {
     document.getElementById('w06-l-txt').innerText = L;
     document.getElementById('w06-w-txt').innerText = W;
 
+    const isWall = this.state.mission === 'wall' || this.state.mission === 'wall_gate';
+    const isGate = this.state.mission === 'gate' || this.state.mission === 'wall_gate';
+    const isCorner = this.state.mission === 'corner';
+    const isDeployed = this.state.fenceDeployed;
+
+    let needed = full;
+    if (isCorner) {
+      needed = L + W;
+    } else {
+      if (isWall) needed -= L;
+      if (isGate) needed -= 3;
+    }
+
+    const g = document.getElementById('w06-farm-g');
     const rW = L * scale;
     const rH = W * scale;
     const sx = (600 - rW) / 2;
     const sy = (320 - rH) / 2;
 
-    const g = document.getElementById('w06-farm-g');
-    const isDeployed = this.state.fenceDeployed;
-    const isWall = isDeployed && (this.state.mission === 'wall' || this.state.mission === 'wall_gate');
-    const isGate = isDeployed && (this.state.mission === 'gate' || this.state.mission === 'wall_gate');
-
-    let needed = full;
-
     let html = `
-      <rect x="${sx}" y="${sy}" width="${rW}" height="${rH}" fill="#dcfce7" stroke="#86efac" stroke-width="2.5" rx="6" />
-      <text x="${sx + rW / 2}" y="${sy + rH / 2 + 6}" font-size="15" fill="#15803d" font-weight="900" text-anchor="middle">農場草坪 (${L} cm × ${W} cm)</text>
-      <text x="${sx + rW / 2}" y="${sy - 12}" font-size="13" fill="#334155" font-weight="bold" text-anchor="middle">長 ＝ ${L} cm</text>
-      <text x="${sx - 14}" y="${sy + rH / 2}" font-size="13" fill="#334155" font-weight="bold" text-anchor="middle" transform="rotate(-90, ${sx - 14}, ${sy + rH / 2})">寬 ＝ ${W} cm</text>
+      <!-- 草坪底色 -->
+      <rect x="${sx}" y="${sy}" width="${rW}" height="${rH}" fill="#bbf7d0" stroke="#86efac" stroke-width="2" rx="4" />
+      <text x="${sx + rW / 2}" y="${sy + rH / 2}" font-size="16" fill="#15803d" font-weight="900" text-anchor="middle">🍀 綠色農場草坪</text>
+      <text x="${sx + rW / 2}" y="${sy + rH / 2 + 22}" font-size="13" fill="#166534" text-anchor="middle">長 ${L}cm × 寬 ${W}cm</text>
     `;
 
-    if (!isDeployed) {
+    // 四周待圍虛線
+    html += `
+      <rect x="${sx}" y="${sy}" width="${rW}" height="${rH}" fill="none" stroke="#94a3b8" stroke-width="2.5" stroke-dasharray="6,4" rx="4" />
+    `;
+
+    // 靠牆渲染
+    if (isCorner) {
+      // 轉角：頂邊與左邊皆為磚牆
       html += `
-        <rect x="${sx}" y="${sy}" width="${rW}" height="${rH}" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6,6" rx="6" />
-        <text x="${sx + rW / 2}" y="${sy + rH / 2 + 30}" font-size="12" fill="#64748b" font-weight="bold" text-anchor="middle">四周籬笆尚未鋪設，點擊下方「拉毛線」開始！</text>
+        <!-- 頂邊磚牆 -->
+        <rect x="${sx - 6}" y="${sy - 14}" width="${rW + 12}" height="14" fill="#b91c1c" stroke="#7f1d1d" stroke-width="2" rx="2" />
+        <text x="${sx + rW / 2}" y="${sy - 2}" font-size="11" fill="#fef2f2" font-weight="bold" text-anchor="middle">🧱 圍牆轉角 (北牆 ${L}cm)</text>
+        <!-- 左邊磚牆 -->
+        <rect x="${sx - 14}" y="${sy - 14}" width="14" height="${rH + 28}" fill="#b91c1c" stroke="#7f1d1d" stroke-width="2" rx="2" />
+        <text x="${sx - 24}" y="${sy + rH / 2}" font-size="11" fill="#b91c1c" font-weight="bold" text-anchor="middle" transform="rotate(-90, ${sx - 24}, ${sy + rH / 2})">🧱 西牆 (${W}cm)</text>
       `;
-    } else {
-      // 頂邊
-      if (isWall) {
-        html += `
-          <rect x="${sx - 12}" y="${sy - 18}" width="${rW + 24}" height="18" fill="#b91c1c" stroke="#7f1d1d" stroke-width="2" />
-          <text x="${sx + rW / 2}" y="${sy - 5}" font-size="11" fill="white" font-weight="bold" text-anchor="middle">🧱 現成磚牆 (免圍長邊)</text>
-          <path d="M ${sx} ${sy} Q ${sx + rW / 2} ${sy + 35} ${sx + rW} ${sy}" fill="none" stroke="#94a3b8" stroke-width="2.5" stroke-dasharray="4,4" />
-        `;
-        needed -= L;
-      } else {
-        html += `<line x1="${sx}" y1="${sy}" x2="${sx + rW}" y2="${sy}" stroke="#ef4444" stroke-width="6" stroke-linecap="round" />`;
-      }
+    } else if (isWall) {
+      // 頂邊紅磚牆
+      html += `
+        <rect x="${sx - 6}" y="${sy - 14}" width="${rW + 12}" height="14" fill="#b91c1c" stroke="#7f1d1d" stroke-width="2" rx="2" />
+        <text x="${sx + rW / 2}" y="${sy - 2}" font-size="11" fill="#fef2f2" font-weight="bold" text-anchor="middle">🧱 現成紅磚牆 (${L}cm - 無需圍籬)</text>
+      `;
+    }
 
-      // 左右
-      html += `<line x1="${sx}" y1="${sy}" x2="${sx}" y2="${sy + rH}" stroke="#ef4444" stroke-width="6" stroke-linecap="round" />`;
-      html += `<line x1="${sx + rW}" y1="${sy}" x2="${sx + rW}" y2="${sy + rH}" stroke="#ef4444" stroke-width="6" stroke-linecap="round" />`;
-
-      // 底邊
-      if (isGate) {
-        const gatePx = 3 * scale;
-        const gS = sx + rW / 2 - gatePx / 2;
-        const gE = gS + gatePx;
+    // 鋪設紅色毛線籬笆
+    if (isDeployed) {
+      if (isCorner) {
+        // 轉角：只圍右邊和底邊
         html += `
-          <line x1="${sx}" y1="${sy + rH}" x2="${gS}" y2="${sy + rH}" stroke="#ef4444" stroke-width="6" stroke-linecap="round" />
-          <rect x="${gS}" y="${sy + rH - 5}" width="${gatePx}" height="10" fill="#d97706" rx="3" />
-          <text x="${(gS + gE) / 2}" y="${sy + rH + 20}" font-size="12" fill="#b45309" font-weight="bold" text-anchor="middle">🚪 3cm 大門 (扣除3cm)</text>
-          <line x1="${gE}" y1="${sy + rH}" x2="${sx + rW}" y2="${sy + rH}" stroke="#ef4444" stroke-width="6" stroke-linecap="round" />
+          <!-- 右邊籬笆 -->
+          <line x1="${sx + rW}" y1="${sy}" x2="${sx + rW}" y2="${sy + rH}" stroke="#ef4444" stroke-width="6" stroke-linecap="round" />
+          <text x="${sx + rW + 16}" y="${sy + rH / 2}" font-size="12" fill="#dc2626" font-weight="bold">🧶 寬 ${W}cm</text>
+          <!-- 底邊籬笆 -->
+          <line x1="${sx}" y1="${sy + rH}" x2="${sx + rW}" y2="${sy + rH}" stroke="#ef4444" stroke-width="6" stroke-linecap="round" />
+          <text x="${sx + rW / 2}" y="${sy + rH + 20}" font-size="12" fill="#dc2626" font-weight="bold" text-anchor="middle">🧶 長 ${L}cm</text>
         `;
-        needed -= 3;
       } else {
-        html += `<line x1="${sx}" y1="${sy + rH}" x2="${sx + rW}" y2="${sy + rH}" stroke="#ef4444" stroke-width="6" stroke-linecap="round" />`;
+        // 頂邊
+        if (!isWall) {
+          html += `<line x1="${sx}" y1="${sy}" x2="${sx + rW}" y2="${sy}" stroke="#ef4444" stroke-width="6" stroke-linecap="round" />`;
+        }
+        // 左邊與右邊
+        html += `<line x1="${sx}" y1="${sy}" x2="${sx}" y2="${sy + rH}" stroke="#ef4444" stroke-width="6" stroke-linecap="round" />`;
+        html += `<line x1="${sx + rW}" y1="${sy}" x2="${sx + rW}" y2="${sy + rH}" stroke="#ef4444" stroke-width="6" stroke-linecap="round" />`;
+
+        // 底邊
+        if (isGate) {
+          const gatePx = 3 * scale;
+          const gS = sx + rW / 2 - gatePx / 2;
+          const gE = gS + gatePx;
+          html += `
+            <line x1="${sx}" y1="${sy + rH}" x2="${gS}" y2="${sy + rH}" stroke="#ef4444" stroke-width="6" stroke-linecap="round" />
+            <rect x="${gS}" y="${sy + rH - 5}" width="${gatePx}" height="10" fill="#d97706" rx="3" />
+            <text x="${(gS + gE) / 2}" y="${sy + rH + 20}" font-size="12" fill="#b45309" font-weight="bold" text-anchor="middle">🚪 3cm 大門 (扣除3cm)</text>
+            <line x1="${gE}" y1="${sy + rH}" x2="${sx + rW}" y2="${sy + rH}" stroke="#ef4444" stroke-width="6" stroke-linecap="round" />
+          `;
+        } else {
+          html += `<line x1="${sx}" y1="${sy + rH}" x2="${sx + rW}" y2="${sy + rH}" stroke="#ef4444" stroke-width="6" stroke-linecap="round" />`;
+        }
       }
     }
 
@@ -308,6 +348,22 @@ window.TIMSS_LABS['W06'] = {
         guideTag.innerText = '🎉 探究結論 ➔ 雙重扣減模型';
         guideText.innerHTML = `<strong>雙重扣減成功！</strong>算式是 <strong>${full} − ${L} (牆) − 3 (門) ＝ ${needed} cm</strong>！圍籬工程只需 <strong>${needed} cm</strong> 毛線！`;
         guideSub.innerText = '🎯 教師金句：幾何結合真實生活，邊界條件決定算法！';
+      }
+
+    } else if (this.state.mission === 'corner') {
+      guideTitle.innerText = '任務五：資優延伸探究 (轉角兩面靠牆)';
+      if (btnDeploy) btnDeploy.innerText = '🏡 應用：轉角兩面靠牆圍籬';
+
+      if (!isDeployed) {
+        guideTag.className = 'guide-step-tag';
+        guideTag.innerText = '🚀 資優挑戰 ➔ 轉角農場雙面靠牆';
+        guideText.innerHTML = `農場建在圍牆轉角（北邊和西邊都是現成高牆）。請問只需要圍幾條邊？請操作員點擊上方<strong>「🏡 應用：轉角兩面靠牆圍籬」</strong>！`;
+        guideSub.innerText = '💡 請學生思考：省下了幾條長、幾條寬？';
+      } else {
+        guideTag.className = 'guide-step-tag step-done';
+        guideTag.innerText = '🎉 探究結論 ➔ 轉角省下一半周界！';
+        guideText.innerHTML = `<strong>只需圍剩下的 1 個長和 1 個寬！</strong>算式為 <strong>${L} ＋ ${W} ＝ ${needed} cm</strong>！比起全圍 ${full} cm，省下了整整一半！試著調整長寬滑桿，規律始終成立！`;
+        guideSub.innerText = '🎯 體會邊界約束對周界幾何的極限簡化！';
       }
     }
 

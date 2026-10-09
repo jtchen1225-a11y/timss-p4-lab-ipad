@@ -1,6 +1,6 @@
 /**
  * lab09.js - 第 9 週：【量筒小數水滴探秘】 (LAB-W09-N-DEC) - iPad 優化版
- * 教師引導 ➔ 學生主動探究 ➔ 任務切換立即歸零待測
+ * 教師引導 ➔ 學生主動探究 ➔ 任務切換立即歸零排空 ➔ 資優延伸探究 (小數盲盒水滴 PK)
  */
 
 window.TIMSS_LABS = window.TIMSS_LABS || {};
@@ -11,12 +11,13 @@ window.TIMSS_LABS['W09'] = {
   title: '量筒小數水滴探秘',
   domain: '數與運算 Number',
   domainType: 'number',
-  cognitive: '應用 Applying',
-  question: '飲料瓶上寫著 0.8 L 和 0.08 L，看起來只差一個零，倒在量筒裡視覺差距有多震撼？0.354 L 與 0.7 L 誰更多？',
-  activeRole: '🔴 操作員(D) 點擊注水 ➔ 🟣 質疑員(A) 質疑 0.354L 為何少於 0.7L',
+  cognitive: '推理 Reasoning',
+  question: '小明認為「0.354 有 3 位小數，肯定比只有 1 位的 0.7 更多更重」。量筒注水實驗如何擊碎小數位數長度迷思？',
+  activeRole: '🔴 操作員(D) 控制飲料注水 ➔ 🟣 質疑員(A) 挑戰十分位主導權',
 
   state: {
-    mission: 'pk1', // 'pk1', 'pk2', 'order'
+    mission: 'pk1', // 'pk1', 'pk2', 'order', 'extend'
+    extCase: 'c2',  // 'c1', 'c2', 'c3'
     l1: 0,
     l2: 0,
     l3: 0,
@@ -26,7 +27,7 @@ window.TIMSS_LABS['W09'] = {
 
   getTeacherSummary() {
     return {
-      core: `<h4>💡 核心概念提煉</h4><p>小數大小比較絕不能受整數思維誤導去「數數位長短」！比較小數必須遵循「<strong>從最高位向最低位逐位比較</strong>」的法則。在容量單位中 $1\\text{ L} = 1000\\text{ ml}$，十分位上的 1 代表 $100\\text{ ml}$，百分位上的 1 代表 $10\\text{ ml}$。$0.7\\text{ L}$（700ml）雖然只有 1 位小數，卻遠大於 3 位小數但十分位只有 3 的 $0.354\\text{ L}$（354ml）！</p>`,
+      core: `<h4>💡 核心概念提煉</h4><p>小數的大小由<strong>最高位的數碼（十分位、百分位、千分位）</strong>優先決定，與「<strong>小數點後的位數長度</strong>」完全無關！$0.7\\text{ L} = 700\\text{ ml}$，其十分位是 7，而 $0.354\\text{ L} = 354\\text{ ml}$ 十分位只有 3。量筒水柱的高度直觀呈現了毫升容量，徹底破除「位數越多數越大」的錯誤直覺！</p>`,
       formula: `<h4>📐 核心容量換算與位值排序</h4><p>• <strong>基準換算：</strong>$1\\text{ L} = 1000\\text{ ml}$ ｜ $0.1\\text{ L} = 100\\text{ ml}$ ｜ $0.01\\text{ L} = 10\\text{ ml}$<br>• <strong>量杯實測：</strong>$0.8\\text{ L}=800\\text{ ml}$ ＞ $0.7\\text{ L}=700\\text{ ml}$ ＞ $0.354\\text{ L}=354\\text{ ml}$ ＞ $0.08\\text{ L}=80\\text{ ml}$<br>• <strong>大小排序：</strong>$\\mathbf{0.8\\text{ L} > 0.7\\text{ L} > 0.354\\text{ L} > 0.08\\text{ L}}$</p>`,
       quote: `🎯 <strong>教師總結金句：</strong>「小數比較莫數長，高位排起見真章；十分數位定乾坤，長度再長莫被蒙！」`
     };
@@ -34,7 +35,7 @@ window.TIMSS_LABS['W09'] = {
 
   render(container) {
     this.container = container;
-    this.state = { mission: 'pk1', l1: 0, l2: 0, l3: 0, l4: 0, showOrder: false };
+    this.state = { mission: 'pk1', extCase: 'c2', l1: 0, l2: 0, l3: 0, l4: 0, showOrder: false };
 
     container.innerHTML = `
       <!-- 任務切換列：點擊任何任務立即歸零 -->
@@ -43,6 +44,7 @@ window.TIMSS_LABS['W09'] = {
           <button class="touch-btn primary" id="w09-tab-pk1">⚡ 任務一：對決 (0.8 L vs 0.08 L)</button>
           <button class="touch-btn" id="w09-tab-pk2">🥊 任務二：對決 (0.7 L vs 0.354 L)</button>
           <button class="touch-btn" id="w09-tab-order">📊 任務三：四大容量升序大排列</button>
+          <button class="touch-btn" id="w09-tab-ext">🚀 任務四：資優延伸探究 (盲盒PK)</button>
         </div>
         <button class="touch-btn" id="w09-btn-reset">🔄 當前任務歸零排空</button>
       </div>
@@ -61,12 +63,22 @@ window.TIMSS_LABS['W09'] = {
         </div>
       </div>
 
+      <!-- 任務四專屬盲盒選擇列 -->
+      <div class="ipad-controls-bar" style="background:#f0fdf4; border:2px solid #86efac; display:none;" id="w09-ext-bar">
+        <span style="font-weight:bold; color:#166534;">🚀 資優小數盲盒對抗：</span>
+        <div style="display:flex; gap:8px;">
+          <button class="touch-btn" id="w09-ext-c1">盲盒 1：0.5 L vs 0.05 L</button>
+          <button class="touch-btn primary" id="w09-ext-c2">盲盒 2：0.6 L vs 0.589 L (陷阱題)</button>
+          <button class="touch-btn" id="w09-ext-c3">盲盒 3：0.25 L vs 0.205 L</button>
+        </div>
+      </div>
+
       <!-- 4 支大號量筒陳列架 -->
       <div style="background:white; border:2px solid #cbd5e1; border-radius:14px; padding:20px 10px;">
         <div class="ipad-cylinders-grid">
-          <!-- A: 0.8L -->
+          <!-- A: 0.8L / Ext A -->
           <div style="display:flex; flex-direction:column; align-items:center; gap:8px;" id="w09-col-1">
-            <strong style="color:#1d4ed8; font-size:1.05rem;">A 瓶：0.8 L</strong>
+            <strong style="color:#1d4ed8; font-size:1.05rem;" id="w09-title-1">A 瓶：0.8 L</strong>
             <div class="ipad-cylinder-body">
               <div class="ipad-cylinder-liquid" id="w09-l1" style="height:0%;"></div>
               <div style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;">${this.getTicks()}</div>
@@ -75,9 +87,9 @@ window.TIMSS_LABS['W09'] = {
             <button class="touch-btn" id="w09-btn-fill-1" style="font-size:0.85rem; padding:6px 12px;">💧 注入 0.8 L</button>
           </div>
 
-          <!-- B: 0.08L -->
+          <!-- B: 0.08L / Ext B -->
           <div style="display:flex; flex-direction:column; align-items:center; gap:8px;" id="w09-col-2">
-            <strong style="color:#b91c1c; font-size:1.05rem;">B 瓶：0.08 L</strong>
+            <strong style="color:#b91c1c; font-size:1.05rem;" id="w09-title-2">B 瓶：0.08 L</strong>
             <div class="ipad-cylinder-body">
               <div class="ipad-cylinder-liquid" id="w09-l2" style="height:0%; background:linear-gradient(180deg, #f87171, #ef4444);"></div>
               <div style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;">${this.getTicks()}</div>
@@ -146,22 +158,33 @@ window.TIMSS_LABS['W09'] = {
 
     // 任務切換：一律歸零待測！
     bind('w09-tab-pk1', () => {
-      this.state = { mission: 'pk1', l1: 0, l2: 0, l3: 0, l4: 0, showOrder: false };
+      this.state = { mission: 'pk1', extCase: 'c2', l1: 0, l2: 0, l3: 0, l4: 0, showOrder: false };
       this.updateTabs('w09-tab-pk1');
+      document.getElementById('w09-ext-bar').style.display = 'none';
       window.soundFx.click();
       this.update();
     });
 
     bind('w09-tab-pk2', () => {
-      this.state = { mission: 'pk2', l1: 0, l2: 0, l3: 0, l4: 0, showOrder: false };
+      this.state = { mission: 'pk2', extCase: 'c2', l1: 0, l2: 0, l3: 0, l4: 0, showOrder: false };
       this.updateTabs('w09-tab-pk2');
+      document.getElementById('w09-ext-bar').style.display = 'none';
       window.soundFx.click();
       this.update();
     });
 
     bind('w09-tab-order', () => {
-      this.state = { mission: 'order', l1: 0, l2: 0, l3: 0, l4: 0, showOrder: false };
+      this.state = { mission: 'order', extCase: 'c2', l1: 0, l2: 0, l3: 0, l4: 0, showOrder: false };
       this.updateTabs('w09-tab-order');
+      document.getElementById('w09-ext-bar').style.display = 'none';
+      window.soundFx.click();
+      this.update();
+    });
+
+    bind('w09-tab-ext', () => {
+      this.state = { mission: 'extend', extCase: 'c2', l1: 0, l2: 0, l3: 0, l4: 0, showOrder: false };
+      this.updateTabs('w09-tab-ext');
+      document.getElementById('w09-ext-bar').style.display = 'flex';
       window.soundFx.click();
       this.update();
     });
@@ -178,13 +201,23 @@ window.TIMSS_LABS['W09'] = {
 
     // 逐筒注水按鈕
     bind('w09-btn-fill-1', () => {
-      this.state.l1 = this.state.l1 > 0 ? 0 : 800;
+      if (this.state.mission === 'extend') {
+        const val = this.state.extCase === 'c1' ? 500 : this.state.extCase === 'c2' ? 600 : 250;
+        this.state.l1 = this.state.l1 > 0 ? 0 : val;
+      } else {
+        this.state.l1 = this.state.l1 > 0 ? 0 : 800;
+      }
       window.soundFx.waterDrop();
       this.update();
     });
 
     bind('w09-btn-fill-2', () => {
-      this.state.l2 = this.state.l2 > 0 ? 0 : 80;
+      if (this.state.mission === 'extend') {
+        const val = this.state.extCase === 'c1' ? 50 : this.state.extCase === 'c2' ? 589 : 205;
+        this.state.l2 = this.state.l2 > 0 ? 0 : val;
+      } else {
+        this.state.l2 = this.state.l2 > 0 ? 0 : 80;
+      }
       window.soundFx.waterDrop();
       this.update();
     });
@@ -207,10 +240,41 @@ window.TIMSS_LABS['W09'] = {
       window.soundFx.balanceChime();
       this.update();
     });
+
+    // 任務四盲盒子切換
+    bind('w09-ext-c1', () => {
+      this.state.extCase = 'c1';
+      this.state.l1 = 0;
+      this.state.l2 = 0;
+      ['w09-ext-c1', 'w09-ext-c2', 'w09-ext-c3'].forEach(id => document.getElementById(id)?.classList.remove('primary'));
+      document.getElementById('w09-ext-c1')?.classList.add('primary');
+      window.soundFx.click();
+      this.update();
+    });
+
+    bind('w09-ext-c2', () => {
+      this.state.extCase = 'c2';
+      this.state.l1 = 0;
+      this.state.l2 = 0;
+      ['w09-ext-c1', 'w09-ext-c2', 'w09-ext-c3'].forEach(id => document.getElementById(id)?.classList.remove('primary'));
+      document.getElementById('w09-ext-c2')?.classList.add('primary');
+      window.soundFx.click();
+      this.update();
+    });
+
+    bind('w09-ext-c3', () => {
+      this.state.extCase = 'c3';
+      this.state.l1 = 0;
+      this.state.l2 = 0;
+      ['w09-ext-c1', 'w09-ext-c2', 'w09-ext-c3'].forEach(id => document.getElementById(id)?.classList.remove('primary'));
+      document.getElementById('w09-ext-c3')?.classList.add('primary');
+      window.soundFx.click();
+      this.update();
+    });
   },
 
   updateTabs(activeId) {
-    ['w09-tab-pk1', 'w09-tab-pk2', 'w09-tab-order'].forEach(id => {
+    ['w09-tab-pk1', 'w09-tab-pk2', 'w09-tab-order', 'w09-tab-ext'].forEach(id => {
       const b = document.getElementById(id);
       if (b) {
         if (id === activeId) b.classList.add('primary');
@@ -230,19 +294,34 @@ window.TIMSS_LABS['W09'] = {
     if (l3) l3.style.height = `${(this.state.l3 / 1000) * 100}%`;
     if (l4) l4.style.height = `${(this.state.l4 / 1000) * 100}%`;
 
-    document.getElementById('w09-txt-1').innerText = this.state.l1 > 0 ? `${this.state.l1} ml (8個十分位)` : '0 ml (空筒)';
-    document.getElementById('w09-txt-2').innerText = this.state.l2 > 0 ? `${this.state.l2} ml (8個百分位)` : '0 ml (空筒)';
-    document.getElementById('w09-txt-3').innerText = this.state.l3 > 0 ? `${this.state.l3} ml (7個十分位)` : '0 ml (空筒)';
-    document.getElementById('w09-txt-4').innerText = this.state.l4 > 0 ? `${this.state.l4} ml (3個十分位)` : '0 ml (空筒)';
-
+    const title1 = document.getElementById('w09-title-1');
+    const title2 = document.getElementById('w09-title-2');
     const b1 = document.getElementById('w09-btn-fill-1');
     const b2 = document.getElementById('w09-btn-fill-2');
     const b3 = document.getElementById('w09-btn-fill-3');
     const b4 = document.getElementById('w09-btn-fill-4');
-    if (b1) b1.innerText = this.state.l1 > 0 ? '🚰 排空 A 筒' : '💧 注入 0.8 L';
-    if (b2) b2.innerText = this.state.l2 > 0 ? '🚰 排空 B 筒' : '💧 注入 0.08 L';
+
+    if (this.state.mission === 'extend') {
+      const eName1 = this.state.extCase === 'c1' ? '0.5 L' : this.state.extCase === 'c2' ? '0.6 L' : '0.25 L';
+      const eName2 = this.state.extCase === 'c1' ? '0.05 L' : this.state.extCase === 'c2' ? '0.589 L' : '0.205 L';
+      if (title1) title1.innerText = `甲杯：${eName1}`;
+      if (title2) title2.innerText = `乙杯：${eName2}`;
+      if (b1) b1.innerText = this.state.l1 > 0 ? '🚰 排空甲杯' : `💧 注入 ${eName1}`;
+      if (b2) b2.innerText = this.state.l2 > 0 ? '🚰 排空乙杯' : `💧 注入 ${eName2}`;
+    } else {
+      if (title1) title1.innerText = 'A 瓶：0.8 L';
+      if (title2) title2.innerText = 'B 瓶：0.08 L';
+      if (b1) b1.innerText = this.state.l1 > 0 ? '🚰 排空 A 筒' : '💧 注入 0.8 L';
+      if (b2) b2.innerText = this.state.l2 > 0 ? '🚰 排空 B 筒' : '💧 注入 0.08 L';
+    }
+
     if (b3) b3.innerText = this.state.l3 > 0 ? '🚰 排空 C 筒' : '💧 注入 0.7 L';
     if (b4) b4.innerText = this.state.l4 > 0 ? '🚰 排空 D 筒' : '💧 注入 0.354 L';
+
+    document.getElementById('w09-txt-1').innerText = this.state.l1 > 0 ? `${this.state.l1} ml` : '0 ml (空筒)';
+    document.getElementById('w09-txt-2').innerText = this.state.l2 > 0 ? `${this.state.l2} ml` : '0 ml (空筒)';
+    document.getElementById('w09-txt-3').innerText = this.state.l3 > 0 ? `${this.state.l3} ml (7個十分位)` : '0 ml (空筒)';
+    document.getElementById('w09-txt-4').innerText = this.state.l4 > 0 ? `${this.state.l4} ml (3個十分位)` : '0 ml (空筒)';
 
     // 欄位顯示過濾
     const col1 = document.getElementById('w09-col-1');
@@ -251,7 +330,7 @@ window.TIMSS_LABS['W09'] = {
     const col4 = document.getElementById('w09-col-4');
     const orderBox = document.getElementById('w09-order-box');
 
-    if (this.state.mission === 'pk1') {
+    if (this.state.mission === 'pk1' || this.state.mission === 'extend') {
       if (col1) col1.style.display = 'flex';
       if (col2) col2.style.display = 'flex';
       if (col3) col3.style.display = 'none';
@@ -269,21 +348,6 @@ window.TIMSS_LABS['W09'] = {
       if (col3) col3.style.display = 'flex';
       if (col4) col4.style.display = 'flex';
       if (orderBox) orderBox.style.display = 'flex';
-    }
-
-    // 升序文字
-    const orderTxt = document.getElementById('w09-order-txt');
-    if (orderTxt) {
-      if (this.state.showOrder) {
-        orderTxt.innerHTML = `
-          <span style="color:#ef4444;">0.08 L (80ml)</span> ＜ 
-          <span style="color:#7c3aed;">0.354 L (354ml)</span> ＜ 
-          <span style="color:#059669;">0.7 L (700ml)</span> ＜ 
-          <span style="color:#2563eb;">0.8 L (800ml)</span>
-        `;
-      } else {
-        orderTxt.innerText = '等待注入完成後點擊右側按鈕揭曉...';
-      }
     }
 
     // 導引條更新
@@ -351,6 +415,22 @@ window.TIMSS_LABS['W09'] = {
         guideTag.innerText = '🎉 探究結論 ➔ 升序排列大揭秘';
         guideText.innerHTML = `<strong>0.08 L (80ml) ＜ 0.354 L (354ml) ＜ 0.7 L (700ml) ＜ 0.8 L (800ml)！</strong>換算為毫升後，小數大小一目了然！`;
         guideSub.innerText = '🎯 教師金句：十分數位定乾坤，長度再長莫被蒙！';
+      }
+
+    } else if (this.state.mission === 'extend') {
+      guideTitle.innerText = '任務四：資優延伸探究 (小數盲盒水滴 PK)';
+
+      if (this.state.l1 === 0 || this.state.l2 === 0) {
+        guideTag.className = 'guide-step-tag';
+        guideTag.innerText = '🚀 資優探究 ➔ 注入盲盒液體';
+        guideText.innerHTML = `請全班先預測甲乙兩杯誰水位更高，然後點擊下方<strong>「💧 注入」</strong>按鈕進行水量對決！`;
+        guideSub.innerText = '💡 考驗先看十分位、百分位、千分位的小數高階比大小技巧。';
+      } else {
+        guideTag.className = 'guide-step-tag step-done';
+        guideTag.innerText = '🎉 盲盒揭秘 ➔ 真相大白！';
+        const win = this.state.l1 > this.state.l2 ? `甲杯 (${this.state.l1}ml) ＞ 乙杯 (${this.state.l2}ml)` : `乙杯 (${this.state.l2}ml) ＞ 甲杯 (${this.state.l1}ml)`;
+        guideText.innerHTML = `<strong>${win}！</strong>${this.state.extCase === 'c2' ? '0.6 L 十分位是 6，完勝三位小數 0.589 L（十分位只有 5）！' : '再次驗證：位數再多，也大不過高一位的十分位！'}`;
+        guideSub.innerText = '🎯 換個盲盒再試試看吧！';
       }
     }
 

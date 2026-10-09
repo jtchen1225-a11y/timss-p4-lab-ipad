@@ -1,6 +1,6 @@
 /**
  * lab05.js - 第 5 週：【購物天平與代數天平】 (LAB-W05-N-MSTEP) - iPad 優化版
- * 教師引導 ➔ 學生主動探究 ➔ 任務切換立即歸零待測
+ * 教師引導 ➔ 學生主動探究 ➔ 任務切換立即歸零待測 ➔ 資優延伸探究 (多步運算大採購挑戰)
  */
 
 window.TIMSS_LABS = window.TIMSS_LABS || {};
@@ -11,22 +11,23 @@ window.TIMSS_LABS['W05'] = {
   title: '購物天平與代數天平',
   domain: '數與運算 Number',
   domainType: 'number',
-  cognitive: '應用 Applying',
-  question: '小明拿 $100 買了 3 本每本 $15 的筆記本，找回 $55。天平兩邊該放甚麼才能保持平衡？算式括號該加在哪？',
-  activeRole: '🔴 操作員(D) 切換括號模式 ➔ 🟢 發言人(B) 解釋括號保險箱',
+  cognitive: '推理 Reasoning',
+  question: '付 $100 買 3 本筆記本找回 $55。天平上如何達成守恆平衡？反求單價時，小括號到底扮演甚麼保護神角色？',
+  activeRole: '🔴 操作員(D) 放置天平物品與算式 ➔ 🟣 質疑員(A) 挑戰四則運算先後順序',
 
   state: {
-    mission: 'balance', // 'balance', 'algebra'
+    mission: 'balance', // 'balance', 'algebra', 'extend'
     leftCash100: false,
     booksCount: 0,
     change55: false,
-    algebraMode: 'none' // 'none', 'noparen', 'paren'
+    algebraMode: 'none', // 'none', 'noparen', 'paren'
+    extMode: 'none'      // 'none', 'noparen', 'paren'
   },
 
   getTeacherSummary() {
     return {
-      core: `<h4>💡 核心概念提煉</h4><p>在兩步運算與購物情境中，「<strong>付出總額 = 物品總花費 + 找回零錢</strong>」是恆成立的等量關係。當我們要反求每本書的單價時，必須先求出 3 本書的總花費（100 − 55），再除以本數 3。由於乘除運算級別高於加減，若要打破規則強制先算減法，就必須加上「<strong>小括號保險箱</strong>」！</p>`,
-      formula: `<h4>📐 核心算式與運算順序對比</h4><p>• <strong>購物守恆方程：</strong>$100 = 3 \\times 15 + 55$<br>• <strong>加括號正確求解：</strong>$(100 - 55) \\div 3 = 45 \\div 3 = \\mathbf{15\\text{ 元}}$（平衡）<br>• ❌ <strong>漏括號致命錯誤：</strong>$100 - 55 \\div 3 \\approx 100 - 18.3 = \\mathbf{81.7\\text{ 元}}$（天平崩潰！）</p>`,
+      core: `<h4>💡 核心概念提煉</h4><p>購物交易本質是「<strong>總付出 = 總花費 + 找回零錢</strong>」的等量代換關係。當逆向求解商品單價時，必須「<strong>先求總花費（付出減找零），再求單價（除以數量）</strong>」。在無括號情況下，四則運算規則會優先執行除法，導致邏輯顛倒；<strong>小括號如同保險箱</strong>，能強制保護減法優先執行！</p>`,
+      formula: `<h4>📐 核心代數天平模型</h4><p>• <strong>正向購物守恆：</strong>$100 = 3 \\times 15 + 55$<br>• <strong>逆向反求單價：</strong>$(100 − 55) \\div 3 = 45 \\div 3 = \\mathbf{15\\text{ 元}}$<br>• <strong>致命錯誤辨析：</strong>$100 − 55 \\div 3 \\approx 100 − 18.33 = 81.67\\text{ 元}$（不加括號，天平劇烈失衡！）</p>`,
       quote: `🎯 <strong>教師總結金句：</strong>「兩步運算理清序，反求單價先求差；小括號是保險箱，先減後除不走樣！」`
     };
   },
@@ -38,15 +39,17 @@ window.TIMSS_LABS['W05'] = {
       leftCash100: false,
       booksCount: 0,
       change55: false,
-      algebraMode: 'none'
+      algebraMode: 'none',
+      extMode: 'none'
     };
 
     container.innerHTML = `
       <!-- 任務切換列：點擊任何任務立即歸零 -->
       <div class="ipad-controls-bar">
         <div class="controls-left-group">
-          <button class="touch-btn primary" id="w05-tab-bal">🛍️ 任務一：動手拼擺購物守恆天平</button>
-          <button class="touch-btn" id="w05-tab-alg">🔒 任務二：反求單價與括號保險箱對抗</button>
+          <button class="touch-btn primary" id="w05-tab-bal">🛍️ 任務一：購物守恆天平</button>
+          <button class="touch-btn" id="w05-tab-alg">🔒 任務二：括號保險箱對抗</button>
+          <button class="touch-btn" id="w05-tab-ext">🚀 任務三：資優延伸探究 (二重運算挑戰)</button>
         </div>
         <button class="touch-btn" id="w05-btn-reset">🔄 當前任務歸零待測</button>
       </div>
@@ -94,6 +97,19 @@ window.TIMSS_LABS['W05'] = {
         </div>
       </div>
 
+      <!-- 任務三操作面板：資優多步運算挑戰 -->
+      <div id="w05-panel-stage3" class="ipad-controls-bar" style="background:#f0fdf4; border:2px solid #86efac; display:none;">
+        <div style="display:flex; flex-direction:column; gap:6px; width:100%;">
+          <div style="font-size:0.9rem; color:#166534; font-weight:bold;">
+            情境：$200 買 4 盒色筆（每盒 $35），剩餘錢買每把 $10 直尺，能買幾把？（右盤目標：6把直尺）
+          </div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="touch-btn danger" id="w05-ext-btn-nopar">❌ 放上無括號冒失算式：200 − 4 × 35 ÷ 10</button>
+            <button class="touch-btn success" id="w05-ext-btn-par">✅ 放上括號保護算式：(200 − 4 × 35) ÷ 10</button>
+          </div>
+        </div>
+      </div>
+
       <!-- 大天平視覺區 -->
       <div class="big-balance-wrapper">
         <svg class="big-balance-svg" viewBox="0 0 680 380">
@@ -137,11 +153,13 @@ window.TIMSS_LABS['W05'] = {
         leftCash100: false,
         booksCount: 0,
         change55: false,
-        algebraMode: 'none'
+        algebraMode: 'none',
+        extMode: 'none'
       };
       this.updateTabs('w05-tab-bal');
       document.getElementById('w05-panel-stage1').style.display = 'flex';
       document.getElementById('w05-panel-stage2').style.display = 'none';
+      document.getElementById('w05-panel-stage3').style.display = 'none';
       this.resetButtonsUI();
       window.soundFx.click();
       this.update();
@@ -153,11 +171,31 @@ window.TIMSS_LABS['W05'] = {
         leftCash100: false,
         booksCount: 0,
         change55: false,
-        algebraMode: 'none'
+        algebraMode: 'none',
+        extMode: 'none'
       };
       this.updateTabs('w05-tab-alg');
       document.getElementById('w05-panel-stage1').style.display = 'none';
       document.getElementById('w05-panel-stage2').style.display = 'flex';
+      document.getElementById('w05-panel-stage3').style.display = 'none';
+      this.resetButtonsUI();
+      window.soundFx.click();
+      this.update();
+    });
+
+    bind('w05-tab-ext', () => {
+      this.state = {
+        mission: 'extend',
+        leftCash100: false,
+        booksCount: 0,
+        change55: false,
+        algebraMode: 'none',
+        extMode: 'none'
+      };
+      this.updateTabs('w05-tab-ext');
+      document.getElementById('w05-panel-stage1').style.display = 'none';
+      document.getElementById('w05-panel-stage2').style.display = 'none';
+      document.getElementById('w05-panel-stage3').style.display = 'flex';
       this.resetButtonsUI();
       window.soundFx.click();
       this.update();
@@ -168,6 +206,7 @@ window.TIMSS_LABS['W05'] = {
       this.state.booksCount = 0;
       this.state.change55 = false;
       this.state.algebraMode = 'none';
+      this.state.extMode = 'none';
       this.resetButtonsUI();
       window.soundFx.click();
       this.update();
@@ -178,19 +217,42 @@ window.TIMSS_LABS['W05'] = {
       this.state.leftCash100 = !this.state.leftCash100;
       const btn = document.getElementById('w05-btn-toggle-100');
       if (this.state.leftCash100) {
-        btn.classList.add('primary');
-        btn.innerText = '💵 取下 $100 鈔票';
+        if (btn) {
+          btn.classList.add('primary');
+          btn.innerText = '💵 取下 $100 鈔票';
+        }
         window.soundFx.stampThud();
       } else {
-        btn.classList.remove('primary');
-        btn.innerText = '💵 放上 $100 鈔票';
+        if (btn) {
+          btn.classList.remove('primary');
+          btn.innerText = '💵 放上 $100 鈔票';
+        }
+        window.soundFx.click();
+      }
+      this.update();
+    });
+
+    bind('w05-btn-toggle-55', () => {
+      this.state.change55 = !this.state.change55;
+      const btn = document.getElementById('w05-btn-toggle-55');
+      if (this.state.change55) {
+        if (btn) {
+          btn.classList.add('primary');
+          btn.innerText = '🪙 取下 $55 零錢';
+        }
+        window.soundFx.stampThud();
+      } else {
+        if (btn) {
+          btn.classList.remove('primary');
+          btn.innerText = '🪙 放上 $55 零錢';
+        }
         window.soundFx.click();
       }
       this.update();
     });
 
     bind('w05-b-add', () => {
-      if (this.state.booksCount < 5) {
+      if (this.state.booksCount < 6) {
         this.state.booksCount++;
         window.soundFx.click();
         this.update();
@@ -205,21 +267,6 @@ window.TIMSS_LABS['W05'] = {
       }
     });
 
-    bind('w05-btn-toggle-55', () => {
-      this.state.change55 = !this.state.change55;
-      const btn = document.getElementById('w05-btn-toggle-55');
-      if (this.state.change55) {
-        btn.classList.add('primary');
-        btn.innerText = '🪙 取下 $55 零錢';
-        window.soundFx.stampThud();
-      } else {
-        btn.classList.remove('primary');
-        btn.innerText = '🪙 放上 $55 零錢';
-        window.soundFx.click();
-      }
-      this.update();
-    });
-
     // 階段二算式選擇
     bind('w05-btn-nopar', () => {
       this.state.algebraMode = 'noparen';
@@ -229,6 +276,19 @@ window.TIMSS_LABS['W05'] = {
 
     bind('w05-btn-par', () => {
       this.state.algebraMode = 'paren';
+      window.soundFx.balanceChime();
+      this.update();
+    });
+
+    // 階段三延伸算式選擇
+    bind('w05-ext-btn-nopar', () => {
+      this.state.extMode = 'noparen';
+      window.soundFx.tiltBuzz();
+      this.update();
+    });
+
+    bind('w05-ext-btn-par', () => {
+      this.state.extMode = 'paren';
       window.soundFx.balanceChime();
       this.update();
     });
@@ -248,7 +308,7 @@ window.TIMSS_LABS['W05'] = {
   },
 
   updateTabs(activeId) {
-    ['w05-tab-bal', 'w05-tab-alg'].forEach(id => {
+    ['w05-tab-bal', 'w05-tab-alg', 'w05-tab-ext'].forEach(id => {
       const b = document.getElementById(id);
       if (b) {
         if (id === activeId) b.classList.add('primary');
@@ -336,8 +396,7 @@ window.TIMSS_LABS['W05'] = {
         guideSub.innerText = '🎯 教師金句：付出總額等於花費加找零，等量守恆天平平！';
       }
 
-    } else {
-      // 任務二：括號對抗
+    } else if (this.state.mission === 'algebra') {
       guideTitle.innerText = '任務二：反求單價與括號保險箱對決';
 
       if (this.state.algebraMode === 'none') {
@@ -386,6 +445,57 @@ window.TIMSS_LABS['W05'] = {
         guideTag.innerText = '🎉 探究結論 ➔ 括號保險箱立大功！';
         guideText.innerHTML = `<strong>天平穩如泰山！</strong>加上括號 <strong>(100 − 55) ÷ 3</strong>，保險箱強制先算減法（求 3 本總價 $45），再除以 3 得出單價 <strong>$15</strong>！天平完美平衡！`;
         guideSub.innerText = '🎯 教師金句：小括號是保險箱，先減後除不走樣！';
+      }
+
+    } else if (this.state.mission === 'extend') {
+      guideTitle.innerText = '任務三：資優延伸探究 (多步運算大採購)';
+
+      if (this.state.extMode === 'none') {
+        beam.setAttribute('transform', 'rotate(0, 340, 150)');
+        needle.style.stroke = '#64748b';
+        lG.innerHTML = '';
+        rG.innerHTML = `
+          <rect x="505" y="190" width="75" height="42" rx="5" fill="#059669" stroke="#047857" stroke-width="2" />
+          <text x="542" y="216" fill="white" font-size="12" font-weight="bold" text-anchor="middle">6 把直尺</text>
+        `;
+        guideTag.className = 'guide-step-tag';
+        guideTag.innerText = '🚀 資優探究 ➔ 待放算式';
+        guideText.innerHTML = `小紅帶 $200 買 4 盒色筆（每盒 $35），剩餘錢買每把 $10 直尺。右盤已放好目標 <strong>6 把直尺</strong>。請操作員點擊放上<strong>「無括號冒失算式」</strong>測試！`;
+        guideSub.innerText = '💡 先在心中口算：不加括號會先算哪一步？';
+
+      } else if (this.state.extMode === 'noparen') {
+        beam.setAttribute('transform', 'rotate(-16, 340, 150)');
+        needle.style.stroke = '#ef4444';
+        lG.innerHTML = `
+          <rect x="75" y="166" width="135" height="48" rx="5" fill="#ef4444" stroke="#b91c1c" stroke-width="2" />
+          <text x="142" y="186" fill="white" font-size="10" font-weight="bold" text-anchor="middle">200 − 4×35 ÷ 10</text>
+          <text x="142" y="204" fill="#fecaca" font-size="10" font-weight="bold" text-anchor="middle">＝ 200 − 14 ＝ 186</text>
+        `;
+        rG.innerHTML = `
+          <rect x="505" y="215" width="75" height="42" rx="5" fill="#059669" stroke="#047857" stroke-width="2" />
+          <text x="542" y="241" fill="white" font-size="12" font-weight="bold" text-anchor="middle">6 把直尺</text>
+        `;
+        guideTag.className = 'guide-step-tag step-alert';
+        guideTag.innerText = '💥 致命算錯：天平傾覆！';
+        guideText.innerHTML = `<strong>不加括號算出 186 把直尺的荒唐結果！</strong>先乘除優先算了 4×35÷10＝14，再算 200−14＝186！左盤 186 徹底砸垮右盤 6 把！請點擊<strong>「✅ 括號保護算式」</strong>！`;
+        guideSub.innerText = '💡 這證明了在多步運算中，括號能改變運算優先級！';
+
+      } else if (this.state.extMode === 'paren') {
+        beam.setAttribute('transform', 'rotate(0, 340, 150)');
+        needle.style.stroke = '#10b981';
+        lG.innerHTML = `
+          <rect x="75" y="190" width="135" height="46" rx="5" fill="#10b981" stroke="#047857" stroke-width="2" />
+          <text x="142" y="210" fill="white" font-size="10" font-weight="bold" text-anchor="middle">(200 − 4×35) ÷ 10</text>
+          <text x="142" y="226" fill="#d1fae5" font-size="10" font-weight="bold" text-anchor="middle">＝ 60 ÷ 10 ＝ 6</text>
+        `;
+        rG.innerHTML = `
+          <rect x="505" y="190" width="75" height="42" rx="5" fill="#059669" stroke="#047857" stroke-width="2" />
+          <text x="542" y="216" fill="white" font-size="12" font-weight="bold" text-anchor="middle">6 把直尺</text>
+        `;
+        guideTag.className = 'guide-step-tag step-done';
+        guideTag.innerText = '🎉 探究結論 ➔ 二重多步括號完美守恆！';
+        guideText.innerHTML = `<strong>天平精確水平平衡！</strong>括號先鎖住買色筆的花費 $140，算出剩餘錢 $60，再除以單價 $10 得出 <strong>6 把直尺</strong>！等量守恆完全成立！`;
+        guideSub.innerText = '🎯 體會多步複合應用題中，括號對運算順序的絕對支配權！';
       }
     }
 

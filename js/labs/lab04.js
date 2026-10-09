@@ -1,6 +1,6 @@
 /**
  * lab04.js - 第 4 週：【殘缺斷尺尋寶大挑戰】 (LAB-W04-MG-SCALE) - iPad 優化版
- * 教師引導 ➔ 學生主動探究 ➔ 任務切換立即歸零待測
+ * 教師引導 ➔ 學生主動探究 ➔ 任務切換立即歸零待測 ➔ 資優延伸探究 (神秘盲盒與自訂破損)
  */
 
 window.TIMSS_LABS = window.TIMSS_LABS || {};
@@ -9,22 +9,24 @@ window.TIMSS_LABS['W04'] = {
   id: 'W04',
   code: 'LAB-W04-MG-SCALE',
   title: '殘缺斷尺尋寶大挑戰',
-  domain: '測量與幾何 M&G',
-  domainType: 'mg',
+  domain: '測量與幾何 Measurement & Geometry',
+  domainType: 'geometry',
   cognitive: '應用 Applying',
-  question: '尺子的 0 刻度被黑膠帶死死封住了，如何精確量出一枝新鉛筆的身長？為什麼直接讀右邊數字是錯的？',
-  activeRole: '🔴 操作員(D) 平移待測物 ➔ 🟣 質疑員(A) 撕膠帶透視驗證',
+  question: '一把 0~5cm 刻度被黑膠帶覆蓋的斷尺，鉛筆從 6.0cm 開始放，右端指著 21.4cm。鉛筆長度到底是不是 21.4cm？',
+  activeRole: '🔴 操作員(D) 調整物品起點與撕膠帶 ➔ 🟢 發言人(B) 揭示終點減起點',
 
   state: {
     itemKey: 'pencil',
     start: 6.0,
     revealed: false,
     zeroAligned: false,
+    isBlind: false,
     items: {
-      pencil: { name: '全新鉛筆', icon: '✏️', len: 15.4, color: '#f59e0b' },
-      scissors: { name: '安全剪刀', icon: '✂️', len: 11.2, color: '#ef4444' },
-      note: { name: '正方形便簽', icon: '📝', len: 7.5, color: '#10b981' },
-      marker: { name: '水彩彩色筆', icon: '🖍️', len: 13.0, color: '#8b5cf6' }
+      pencil: { name: '全新鉛筆', icon: '✏️', len: 15.4, color: '#3b82f6' },
+      scissors: { name: '安全剪刀', icon: '✂️', len: 12.6, color: '#10b981' },
+      note: { name: '正方形便簽', icon: '📝', len: 7.5, color: '#f59e0b' },
+      marker: { name: '水彩彩色筆', icon: '🖍️', len: 13.8, color: '#8b5cf6' },
+      blind: { name: '神秘盲盒', icon: '🎁', len: 11.8, color: 'linear-gradient(135deg, #f59e0b, #d97706)' }
     }
   },
 
@@ -46,6 +48,7 @@ window.TIMSS_LABS['W04'] = {
       start: 6.0,
       revealed: false,
       zeroAligned: false,
+      isBlind: false,
       items: this.state.items
     };
 
@@ -57,6 +60,7 @@ window.TIMSS_LABS['W04'] = {
           <button class="touch-btn" id="w04-tab-scissors">✂️ 任務二：安全剪刀尋寶</button>
           <button class="touch-btn" id="w04-tab-note">📝 任務三：正方形便簽尋寶</button>
           <button class="touch-btn" id="w04-tab-marker">🖍️ 任務四：水彩彩色筆尋寶</button>
+          <button class="touch-btn" id="w04-tab-blind">🚀 任務五：資優延伸探究 (神秘盲盒)</button>
         </div>
         <button class="touch-btn" id="w04-btn-reset">🔄 當前任務歸零待測</button>
       </div>
@@ -75,11 +79,22 @@ window.TIMSS_LABS['W04'] = {
         </div>
       </div>
 
+      <!-- 資優盲盒專屬列（任務五顯示） -->
+      <div id="w04-blind-bar" style="display:none; background:#fef3c7; border:2px solid #fcd34d; border-radius:12px; padding:10px 16px; margin-bottom:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <div>
+            <strong style="color:#92400e; font-size:1rem;">🎁 資優神秘盲盒挑戰：</strong>
+            <span style="font-size:0.85rem; color:#b45309;">物體長度與放置位置完全隨機，考驗學生心算終點減起點的能力！</span>
+          </div>
+          <button class="touch-btn primary" id="w04-btn-new-blind">🎲 隨機抽取新盲盒</button>
+        </div>
+      </div>
+
       <!-- 物體起點平移與操作列 -->
       <div class="ipad-controls-bar" style="background:#f8fafc;">
         <div style="display:flex; align-items:center; gap:12px;">
           <label style="font-weight:bold; font-size:1rem;">📍 物體左端起點對齊刻度：<strong id="w04-start-txt" style="color:var(--primary); font-size:1.2rem;">6.0</strong> cm</label>
-          <input type="range" class="touch-slider" id="w04-start-slider" min="5.0" max="10.0" value="6.0" step="0.5" style="width:200px;">
+          <input type="range" class="touch-slider" id="w04-start-slider" min="3.0" max="11.0" value="6.0" step="0.5" style="width:180px;">
         </div>
         <div style="display:flex; gap:8px;">
           <button class="touch-btn primary" id="w04-btn-calc">🧮 算一算跨越刻度 (終點−起點)</button>
@@ -159,6 +174,7 @@ window.TIMSS_LABS['W04'] = {
       if (el) {
         el.addEventListener('click', () => {
           this.state.itemKey = key;
+          this.state.isBlind = key === 'blind';
           this.state.start = 6.0;
           this.state.revealed = false;
           this.state.zeroAligned = false;
@@ -177,6 +193,26 @@ window.TIMSS_LABS['W04'] = {
     bindItem('w04-tab-scissors', 'scissors');
     bindItem('w04-tab-note', 'note');
     bindItem('w04-tab-marker', 'marker');
+    bindItem('w04-tab-blind', 'blind');
+
+    // 隨機盲盒
+    const btnNewBlind = document.getElementById('w04-btn-new-blind');
+    if (btnNewBlind) {
+      btnNewBlind.addEventListener('click', () => {
+        const randLen = parseFloat((5.5 + Math.random() * 9.5).toFixed(1));
+        const randStart = parseFloat((4.0 + Math.random() * 4.0).toFixed(1));
+        this.state.items.blind.len = randLen;
+        this.state.start = randStart;
+        this.state.revealed = false;
+        this.state.zeroAligned = false;
+        const slider = document.getElementById('w04-start-slider');
+        if (slider) slider.value = randStart;
+        const btnTape = document.getElementById('w04-btn-tape');
+        if (btnTape) btnTape.innerText = '🩹 撕開膠帶並對齊 0 刻度驗證';
+        window.soundFx.balanceChime();
+        this.update();
+      });
+    }
 
     // 起點滑桿
     const slider = document.getElementById('w04-start-slider');
@@ -234,7 +270,7 @@ window.TIMSS_LABS['W04'] = {
   },
 
   updateTabs(activeId) {
-    ['w04-tab-pencil', 'w04-tab-scissors', 'w04-tab-note', 'w04-tab-marker'].forEach(id => {
+    ['w04-tab-pencil', 'w04-tab-scissors', 'w04-tab-note', 'w04-tab-marker', 'w04-tab-blind'].forEach(id => {
       const b = document.getElementById(id);
       if (b) {
         if (id === activeId) b.classList.add('primary');
@@ -252,6 +288,9 @@ window.TIMSS_LABS['W04'] = {
     const sPx = s * 30;
     const lenPx = len * 30;
     const ePx = e * 30;
+
+    const blindBar = document.getElementById('w04-blind-bar');
+    if (blindBar) blindBar.style.display = this.state.isBlind ? 'block' : 'none';
 
     const tape = document.getElementById('w04-tape');
     if (tape) tape.style.opacity = this.state.zeroAligned ? '0' : '1';
@@ -306,9 +345,9 @@ window.TIMSS_LABS['W04'] = {
 
     if (!this.state.revealed && !this.state.zeroAligned) {
       guideTag.className = 'guide-step-tag';
-      guideTag.innerText = '👨‍🏫 老師引導 ➔ 第 1 步 / 共 3 步';
+      guideTag.innerText = this.state.isBlind ? '🚀 資優盲盒 ➔ 第 1 步：心算跨度' : '👨‍🏫 老師引導 ➔ 第 1 步 / 共 3 步';
       guideText.innerHTML = `尺子的 0 刻度被黑膠帶封住了。${item.name}從 <strong>${s.toFixed(1)} cm</strong> 開始放，右端指著 <strong>${e.toFixed(1)} cm</strong>。小明猜${item.name}長 ${e.toFixed(1)} cm，你同意嗎？`;
-      guideSub.innerText = '💡 請老師引導學生觀察起點：物體左端根本沒碰到 0 刻度，能直接讀右邊數字嗎？';
+      guideSub.innerText = this.state.isBlind ? '💡 資優挑戰：先在心中算出真實長度，再點擊計算驗證！' : '💡 請老師引導學生觀察起點：物體左端根本沒碰到 0 刻度，能直接讀右邊數字嗎？';
     } else if (this.state.revealed && !this.state.zeroAligned) {
       guideTag.className = 'guide-step-tag step-alert';
       guideTag.innerText = '👨‍🏫 老師引導 ➔ 第 2 步 / 共 3 步';
