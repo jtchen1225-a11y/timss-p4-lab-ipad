@@ -1,6 +1,6 @@
 /**
- * lab06.js - 第 6 週：【毛線籬笆變形記】 (LAB-W06-MG-PER) - iPad 優化版
- * 測量與幾何 ｜ 應用 Applying ｜ 大尺寸農場、毛線剪貼、磚牆與大門情境
+ * lab06.js - 第 6 週：【毛線籬笆變形記】 (LAB-W06-MG-PER) - iPad 優化版 (動手拉線與剪貼探索)
+ * 測量與幾何 ｜ 應用 Applying ｜ 無劇透按鈕、動態拉線圍籬、靠牆剪邊、留門扣除
  */
 
 window.TIMSS_LABS = window.TIMSS_LABS || {};
@@ -18,6 +18,7 @@ window.TIMSS_LABS['W06'] = {
   state: {
     length: 12,
     width: 8,
+    fenceDeployed: false, // 初始尚未圍籬笆，等學生動手拉線！
     mode: 'full' // 'full', 'wall', 'gate', 'wall_gate'
   },
 
@@ -37,28 +38,32 @@ window.TIMSS_LABS['W06'] = {
 
   render(container) {
     this.container = container;
-    this.state = { length: 12, width: 8, mode: 'full' };
+    this.state = { length: 12, width: 8, fenceDeployed: false, mode: 'full' };
 
     container.innerHTML = `
       <div class="ipad-controls-bar">
         <div class="controls-left-group">
           <div style="display:flex; align-items:center; gap:8px;">
             <label style="font-weight:bold;">📏 長度 (L)：<strong id="w06-l-txt" style="color:var(--primary); font-size:1.1rem;">12</strong> cm</label>
-            <input type="range" class="touch-slider" id="w06-l-slider" min="6" max="16" value="12" step="1">
+            <input type="range" class="touch-slider" id="w06-l-slider" min="6" max="16" value="12" step="1" style="width:120px;">
           </div>
           <div style="display:flex; align-items:center; gap:8px;">
             <label style="font-weight:bold;">📐 寬度 (W)：<strong id="w06-w-txt" style="color:var(--primary); font-size:1.1rem;">8</strong> cm</label>
-            <input type="range" class="touch-slider" id="w06-w-slider" min="4" max="12" value="8" step="1">
+            <input type="range" class="touch-slider" id="w06-w-slider" min="4" max="12" value="8" step="1" style="width:120px;">
           </div>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="touch-btn primary" id="w06-btn-deploy">🧶 拉毛線繞一週圍籬笆</button>
+          <button class="touch-btn" id="w06-btn-reset">🔄 重置農場</button>
         </div>
       </div>
 
-      <!-- 情境切換按鈕列 -->
+      <!-- 情境切換按鈕列 (清除答案劇透) -->
       <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
-        <button class="touch-btn primary" id="w06-btn-full">🏞️ 情境 A：四面全圍 (40cm)</button>
-        <button class="touch-btn" id="w06-btn-wall" style="border-color:#b91c1c; color:#b91c1c;">🧱 情境 B：長邊靠磚牆 (減長邊)</button>
-        <button class="touch-btn" id="w06-btn-gate" style="border-color:#d97706; color:#d97706;">🚪 情境 C：底邊留 3cm 門 (剪去門)</button>
-        <button class="touch-btn" id="w06-btn-wallgate" style="border-color:#7c3aed; color:#7c3aed;">⭐ 靠牆 ＋ 留門</button>
+        <button class="touch-btn primary" id="w06-btn-full">🏞️ 情境 A：四面全圍籬笆</button>
+        <button class="touch-btn" id="w06-btn-wall" style="border-color:#b91c1c; color:#b91c1c;">🧱 情境 B：長邊改靠現成磚牆</button>
+        <button class="touch-btn" id="w06-btn-gate" style="border-color:#d97706; color:#d97706;">🚪 情境 C：底邊開闢 3cm 大門</button>
+        <button class="touch-btn" id="w06-btn-wallgate" style="border-color:#7c3aed; color:#7c3aed;">⭐ 情境 D：靠牆 ＋ 留門組合</button>
       </div>
 
       <!-- 農場大畫布 -->
@@ -68,7 +73,7 @@ window.TIMSS_LABS['W06'] = {
         </svg>
       </div>
 
-      <!-- 解釋文字框 -->
+      <!-- 解釋與算式文字框 -->
       <div id="w06-info-box" style="margin-top:12px; background:#ecfdf5; border:1.5px solid #86efac; border-radius:10px; padding:12px 16px; font-size:0.95rem;"></div>
     `;
 
@@ -96,25 +101,53 @@ window.TIMSS_LABS['W06'] = {
       });
     }
 
-    const bind = (id, mode) => {
+    // 動手拉線
+    const btnDeploy = document.getElementById('w06-btn-deploy');
+    if (btnDeploy) {
+      btnDeploy.addEventListener('click', () => {
+        this.state.fenceDeploy = true;
+        this.state.fenceDeployed = true;
+        window.soundFx.rubberSnap();
+        this.update();
+      });
+    }
+
+    const bindMode = (id, mode) => {
       const el = document.getElementById(id);
       if (el) {
         el.addEventListener('click', () => {
+          this.state.fenceDeployed = true;
           this.state.mode = mode;
           ['w06-btn-full', 'w06-btn-wall', 'w06-btn-gate', 'w06-btn-wallgate'].forEach(b => {
             document.getElementById(b)?.classList.remove('primary');
           });
           el.classList.add('primary');
-          window.soundFx.rubberSnap();
+          window.soundFx.stampThud();
           this.update();
         });
       }
     };
 
-    bind('w06-btn-full', 'full');
-    bind('w06-btn-wall', 'wall');
-    bind('w06-btn-gate', 'gate');
-    bind('w06-btn-wallgate', 'wall_gate');
+    bindMode('w06-btn-full', 'full');
+    bindMode('w06-btn-wall', 'wall');
+    bindMode('w06-btn-gate', 'gate');
+    bindMode('w06-btn-wallgate', 'wall_gate');
+
+    // 重置
+    const btnReset = document.getElementById('w06-btn-reset');
+    if (btnReset) {
+      btnReset.addEventListener('click', () => {
+        this.state = { length: 12, width: 8, fenceDeployed: false, mode: 'full' };
+        document.getElementById('w06-l-slider').value = '12';
+        document.getElementById('w06-w-slider').value = '8';
+        ['w06-btn-wall', 'w06-btn-gate', 'w06-btn-wallgate'].forEach(b => {
+          document.getElementById(b)?.classList.remove('primary');
+        });
+        document.getElementById('w06-btn-full')?.classList.add('primary');
+        window.soundFx.click();
+        this.update();
+      });
+    }
   },
 
   update() {
@@ -135,70 +168,86 @@ window.TIMSS_LABS['W06'] = {
     const info = document.getElementById('w06-info-box');
 
     let needed = full;
-    const isWall = this.state.mode === 'wall' || this.state.mode === 'wall_gate';
-    const isGate = this.state.mode === 'gate' || this.state.mode === 'wall_gate';
+    const isDeployed = this.state.fenceDeployed;
+    const isWall = isDeployed && (this.state.mode === 'wall' || this.state.mode === 'wall_gate');
+    const isGate = isDeployed && (this.state.mode === 'gate' || this.state.mode === 'wall_gate');
 
     let html = `
       <rect x="${sx}" y="${sy}" width="${rW}" height="${rH}" fill="#dcfce7" stroke="#86efac" stroke-width="2.5" rx="6" />
-      <text x="${sx + rW / 2}" y="${sy + rH / 2 + 6}" font-size="15" fill="#15803d" font-weight="900" text-anchor="middle">農場面積 ＝ ${L} × ${W} ＝ ${L * W} cm²</text>
-      <text x="${sx + rW / 2}" y="${sy - 10}" font-size="13" fill="#334155" font-weight="bold" text-anchor="middle">長 ＝ ${L} cm</text>
+      <text x="${sx + rW / 2}" y="${sy + rH / 2 + 6}" font-size="15" fill="#15803d" font-weight="900" text-anchor="middle">農場草坪 (${L} cm × ${W} cm)</text>
+      <text x="${sx + rW / 2}" y="${sy - 12}" font-size="13" fill="#334155" font-weight="bold" text-anchor="middle">長 ＝ ${L} cm</text>
       <text x="${sx - 14}" y="${sy + rH / 2}" font-size="13" fill="#334155" font-weight="bold" text-anchor="middle" transform="rotate(-90, ${sx - 14}, ${sy + rH / 2})">寬 ＝ ${W} cm</text>
     `;
 
-    // 頂邊
-    if (isWall) {
+    if (!isDeployed) {
+      // 尚未拉線
       html += `
-        <rect x="${sx - 12}" y="${sy - 18}" width="${rW + 24}" height="18" fill="#b91c1c" stroke="#7f1d1d" stroke-width="2" />
-        <text x="${sx + rW / 2}" y="${sy - 5}" font-size="11" fill="white" font-weight="bold" text-anchor="middle">🧱 磚牆 (長 ${L} cm 免圍籬笆)</text>
-        <path d="M ${sx} ${sy} Q ${sx + rW / 2} ${sy + 40} ${sx + rW} ${sy}" fill="none" stroke="#94a3b8" stroke-width="3" stroke-dasharray="4,4" />
+        <!-- 未拉線虛線邊界 -->
+        <rect x="${sx}" y="${sy}" width="${rW}" height="${rH}" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6,6" rx="6" />
+        <text x="${sx + rW / 2}" y="${sy + rH / 2 + 30}" font-size="12" fill="#64748b" font-weight="bold" text-anchor="middle">四周籬笆尚未鋪設，點擊「拉毛線繞一週」開始！</text>
       `;
-      needed -= L;
     } else {
-      html += `<line x1="${sx}" y1="${sy}" x2="${sx + rW}" y2="${sy}" stroke="#ef4444" stroke-width="6" stroke-linecap="round" />`;
-    }
+      // 頂邊
+      if (isWall) {
+        html += `
+          <rect x="${sx - 12}" y="${sy - 18}" width="${rW + 24}" height="18" fill="#b91c1c" stroke="#7f1d1d" stroke-width="2" />
+          <text x="${sx + rW / 2}" y="${sy - 5}" font-size="11" fill="white" font-weight="bold" text-anchor="middle">🧱 現成磚牆 (長 ${L} cm 免圍籬笆)</text>
+          <path d="M ${sx} ${sy} Q ${sx + rW / 2} ${sy + 35} ${sx + rW} ${sy}" fill="none" stroke="#94a3b8" stroke-width="2.5" stroke-dasharray="4,4" />
+        `;
+        needed -= L;
+      } else {
+        html += `<line x1="${sx}" y1="${sy}" x2="${sx + rW}" y2="${sy}" stroke="#ef4444" stroke-width="6" stroke-linecap="round" />`;
+      }
 
-    // 左邊與右邊
-    html += `<line x1="${sx}" y1="${sy}" x2="${sx}" y2="${sy + rH}" stroke="#ef4444" stroke-width="6" stroke-linecap="round" />`;
-    html += `<line x1="${sx + rW}" y1="${sy}" x2="${sx + rW}" y2="${sy + rH}" stroke="#ef4444" stroke-width="6" stroke-linecap="round" />`;
+      // 左右兩側寬邊
+      html += `<line x1="${sx}" y1="${sy}" x2="${sx}" y2="${sy + rH}" stroke="#ef4444" stroke-width="6" stroke-linecap="round" />`;
+      html += `<line x1="${sx + rW}" y1="${sy}" x2="${sx + rW}" y2="${sy + rH}" stroke="#ef4444" stroke-width="6" stroke-linecap="round" />`;
 
-    // 底邊
-    if (isGate) {
-      const gatePx = 3 * scale;
-      const gS = sx + rW / 2 - gatePx / 2;
-      const gE = gS + gatePx;
-      html += `
-        <line x1="${sx}" y1="${sy + rH}" x2="${gS}" y2="${sy + rH}" stroke="#ef4444" stroke-width="6" stroke-linecap="round" />
-        <rect x="${gS}" y="${sy + rH - 5}" width="${gatePx}" height="10" fill="#d97706" rx="3" />
-        <text x="${(gS + gE) / 2}" y="${sy + rH + 20}" font-size="12" fill="#b45309" font-weight="bold" text-anchor="middle">🚪 3cm 大門 (剪除 3cm)</text>
-        <line x1="${gE}" y1="${sy + rH}" x2="${sx + rW}" y2="${sy + rH}" stroke="#ef4444" stroke-width="6" stroke-linecap="round" />
-      `;
-      needed -= 3;
-    } else {
-      html += `<line x1="${sx}" y1="${sy + rH}" x2="${sx + rW}" y2="${sy + rH}" stroke="#ef4444" stroke-width="6" stroke-linecap="round" />`;
+      // 底邊
+      if (isGate) {
+        const gatePx = 3 * scale;
+        const gS = sx + rW / 2 - gatePx / 2;
+        const gE = gS + gatePx;
+        html += `
+          <line x1="${sx}" y1="${sy + rH}" x2="${gS}" y2="${sy + rH}" stroke="#ef4444" stroke-width="6" stroke-linecap="round" />
+          <rect x="${gS}" y="${sy + rH - 5}" width="${gatePx}" height="10" fill="#d97706" rx="3" />
+          <text x="${(gS + gE) / 2}" y="${sy + rH + 20}" font-size="12" fill="#b45309" font-weight="bold" text-anchor="middle">🚪 3cm 大門 (扣除 3cm)</text>
+          <line x1="${gE}" y1="${sy + rH}" x2="${sx + rW}" y2="${sy + rH}" stroke="#ef4444" stroke-width="6" stroke-linecap="round" />
+        `;
+        needed -= 3;
+      } else {
+        html += `<line x1="${sx}" y1="${sy + rH}" x2="${sx + rW}" y2="${sy + rH}" stroke="#ef4444" stroke-width="6" stroke-linecap="round" />`;
+      }
     }
 
     g.innerHTML = html;
 
-    if (this.state.mode === 'full') {
+    // 文字提示
+    if (!isDeployed) {
+      info.style.background = '#f8fafc';
+      info.style.borderColor = '#cbd5e1';
+      info.style.color = '#475569';
+      info.innerHTML = `🌾 <strong>農場準備就緒：</strong>長 ${L} cm、寬 ${W} cm。請點擊上方按鈕<strong>「🧶 拉毛線繞一週圍籬笆」</strong>，觀測圍滿四周共需要多少毛線！`;
+    } else if (this.state.mode === 'full') {
       info.style.background = '#ecfdf5';
       info.style.borderColor = '#86efac';
       info.style.color = '#065f46';
-      info.innerHTML = `🏞️ <strong>四面全圍：</strong>算式 <strong>(${L} + ${W}) × 2 ＝ ${full} cm</strong>。紅色毛線剛好繞滿四周！`;
+      info.innerHTML = `🏞️ <strong>四面全圍籬笆：</strong>算式 <strong>(${L} + ${W}) × 2 ＝ ${full} cm</strong>。紅色毛線剛好完整繞滿四周！`;
     } else if (this.state.mode === 'wall') {
       info.style.background = '#eff6ff';
       info.style.borderColor = '#bfdbfe';
       info.style.color = '#1e40af';
-      info.innerHTML = `🧱 <strong>長邊靠磚牆：</strong>算式 <strong>(${L} + ${W}) × 2 − ${L} ＝ ${needed} cm</strong>。磚牆抵擋，上面一條邊不用圍，<strong>毛線只需 ${needed} cm，省下 ${L} cm！</strong>`;
+      info.innerHTML = `🧱 <strong>長邊改靠現成磚牆：</strong>算式 <strong>(${L} + ${W}) × 2 − ${L} (牆) ＝ ${needed} cm</strong>。頂部有一堵現成磚牆抵擋，這條邊<strong>不用圍籬笆</strong>，省下 ${L} cm 毛線！`;
     } else if (this.state.mode === 'gate') {
       info.style.background = '#fffbeb';
       info.style.borderColor = '#fde68a';
       info.style.color = '#92400e';
-      info.innerHTML = `🚪 <strong>底邊留 3cm 門：</strong>算式 <strong>(${L} + ${W}) × 2 − 3 ＝ ${needed} cm</strong>。剪掉大門通道，<strong>實用毛線只需 ${needed} cm！</strong>`;
+      info.innerHTML = `🚪 <strong>底邊開闢 3cm 大門：</strong>算式 <strong>(${L} + ${W}) × 2 − 3 (門) ＝ ${needed} cm</strong>。出入口不能用籬笆封死，<strong>剪去 3cm 門寬</strong>，實用毛線只需 ${needed} cm！`;
     } else if (this.state.mode === 'wall_gate') {
       info.style.background = '#f5f3ff';
       info.style.borderColor = '#ddd6fe';
       info.style.color = '#6d28d9';
-      info.innerHTML = `⭐ <strong>雙重扣減（靠牆＋留門）：</strong>算式 <strong>(${L} + ${W}) × 2 − ${L} (牆) − 3 (門) ＝ ${needed} cm</strong>！`;
+      info.innerHTML = `⭐ <strong>靠牆 ＋ 留門雙重組合：</strong>算式 <strong>${full} − ${L} (牆) − 3 (門) ＝ ${needed} cm</strong>！同時扣減天然屏障與出入通道！`;
     }
 
     if (window.ipadApp) {

@@ -1,6 +1,6 @@
 /**
- * lab08.js - 第 8 週：【俄羅斯方塊變形獸】 (LAB-W08-MG-AREA) - iPad 優化版
- * 測量與幾何 ｜ 推理 Reasoning ｜ 面積守恆、大方格磁板、肚裡藏邊紅虛線解析
+ * lab08.js - 第 8 週：【俄羅斯方塊變形獸】 (LAB-W08-MG-AREA) - iPad 優化版 (動手探索邊長與肚裡藏邊)
+ * 測量與幾何 ｜ 推理 Reasoning ｜ 無劇透按鈕、面積守恆、外露邊線動態掃描、肚裡藏邊透視
  */
 
 window.TIMSS_LABS = window.TIMSS_LABS || {};
@@ -17,10 +17,9 @@ window.TIMSS_LABS['W08'] = {
 
   state: {
     preset: 'strip',
-    blocks: [
-      { r: 3, c: 3 }, { r: 3, c: 4 }, { r: 3, c: 5 },
-      { r: 3, c: 6 }, { r: 3, c: 7 }, { r: 3, c: 8 }
-    ]
+    showPerimeter: false, // 初始不劇透周界，等待學生動手探索！
+    showSeams: false,
+    blocks: []
   },
 
   getTeacherSummary() {
@@ -33,15 +32,19 @@ window.TIMSS_LABS['W08'] = {
 
   render(container) {
     this.container = container;
-    this.state = { preset: 'strip', blocks: [] };
+    this.state = { preset: 'strip', showPerimeter: false, showSeams: false, blocks: [] };
     this.setPreset('strip');
 
     container.innerHTML = `
       <div class="ipad-controls-bar">
         <div class="controls-left-group">
-          <button class="touch-btn primary" id="w08-btn-s">🐍 造型 A：1×6 一字長蛇 (周界 14)</button>
-          <button class="touch-btn" id="w08-btn-r">📦 造型 B：2×3 緊湊長方形 (周界 10 最短)</button>
-          <button class="touch-btn" id="w08-btn-l">🦎 造型 C：L 形變形獸 (周界 12)</button>
+          <button class="touch-btn primary" id="w08-btn-s">🐍 造型 A：1×6 一字長蛇</button>
+          <button class="touch-btn" id="w08-btn-r">📦 造型 B：2×3 矩形</button>
+          <button class="touch-btn" id="w08-btn-l">🦎 造型 C：L 形變形獸</button>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="touch-btn primary" id="w08-btn-scan">🔍 掃描外露周界 (數外邊)</button>
+          <button class="touch-btn warning" id="w08-btn-seams">✂️ 透視「肚裡藏邊」接縫</button>
         </div>
       </div>
 
@@ -55,6 +58,7 @@ window.TIMSS_LABS['W08'] = {
           </defs>
           <rect width="520" height="300" fill="url(#w08-pat)" rx="8" />
           <g id="w08-blocks-g"></g>
+          <g id="w08-seams-g"></g>
         </svg>
 
         <!-- 面積與周界即時大對比 -->
@@ -67,8 +71,8 @@ window.TIMSS_LABS['W08'] = {
 
           <div style="flex:1; background:#eff6ff; border:2.5px solid #3b82f6; border-radius:12px; padding:12px; text-align:center;">
             <div style="font-size:0.85rem; color:#1d4ed8; font-weight:bold;">🧶 外圍周界 (外露邊長)</div>
-            <div style="font-size:1.8rem; font-weight:900; color:#2563eb;" id="w08-p-val">14 單位</div>
-            <span style="font-size:0.8rem; color:#1d4ed8;" id="w08-p-cm">14 × 2cm ＝ 28 cm</span>
+            <div style="font-size:1.8rem; font-weight:900; color:#2563eb;" id="w08-p-val">待數邊線</div>
+            <span style="font-size:0.8rem; color:#1d4ed8;" id="w08-p-cm">點擊上方「掃描外露周界」揭曉</span>
           </div>
         </div>
       </div>
@@ -108,6 +112,8 @@ window.TIMSS_LABS['W08'] = {
           ['w08-btn-s', 'w08-btn-r', 'w08-btn-l'].forEach(b => document.getElementById(b)?.classList.remove('primary'));
           el.classList.add('primary');
           this.setPreset(type);
+          this.state.showPerimeter = false;
+          this.state.showSeams = false;
           window.soundFx.stampThud();
           this.update();
         });
@@ -117,10 +123,31 @@ window.TIMSS_LABS['W08'] = {
     bind('w08-btn-s', 'strip');
     bind('w08-btn-r', 'rect');
     bind('w08-btn-l', 'lshape');
+
+    // 掃描外露周界
+    const btnScan = document.getElementById('w08-btn-scan');
+    if (btnScan) {
+      btnScan.addEventListener('click', () => {
+        this.state.showPerimeter = true;
+        window.soundFx.balanceChime();
+        this.update();
+      });
+    }
+
+    // 透視肚裡藏邊
+    const btnSeams = document.getElementById('w08-btn-seams');
+    if (btnSeams) {
+      btnSeams.addEventListener('click', () => {
+        this.state.showSeams = !this.state.showSeams;
+        window.soundFx.click();
+        this.update();
+      });
+    }
   },
 
   update() {
     const g = document.getElementById('w08-blocks-g');
+    const seamsG = document.getElementById('w08-seams-g');
     const tip = document.getElementById('w08-tip-box');
     const pVal = document.getElementById('w08-p-val');
     const pCm = document.getElementById('w08-p-cm');
@@ -130,7 +157,9 @@ window.TIMSS_LABS['W08'] = {
     const set = new Set(blocks.map(b => `${b.r},${b.c}`));
 
     let html = '';
+    let seamsHTML = '';
     let exposed = 0;
+    let internalSeams = 0;
 
     blocks.forEach((b, i) => {
       const x = b.c * sz;
@@ -142,29 +171,59 @@ window.TIMSS_LABS['W08'] = {
 
       // 檢查 4 條邊
       [[-1, 0], [1, 0], [0, -1], [0, 1]].forEach(([dr, dc]) => {
-        if (!set.has(`${b.r + dr},${b.c + dc}`)) exposed++;
+        if (!set.has(`${b.r + dr},${b.c + dc}`)) {
+          exposed++;
+        }
       });
+
+      // 檢查內部重合接縫 (向右與向下，避免重複計數)
+      if (set.has(`${b.r},${b.c + 1}`)) {
+        internalSeams++;
+        seamsHTML += `
+          <line x1="${x + sz}" y1="${y}" x2="${x + sz}" y2="${y + sz}" stroke="#ef4444" stroke-width="4" stroke-dasharray="3,3" />
+        `;
+      }
+      if (set.has(`${b.r + 1},${b.c}`)) {
+        internalSeams++;
+        seamsHTML += `
+          <line x1="${x}" y1="${y + sz}" x2="${x + sz}" y2="${y + sz}" stroke="#ef4444" stroke-width="4" stroke-dasharray="3,3" />
+        `;
+      }
     });
 
     g.innerHTML = html;
-    pVal.innerText = `${exposed} 單位`;
-    pCm.innerText = `${exposed} × 2cm ＝ ${exposed * 2} cm`;
+    seamsG.innerHTML = this.state.showSeams ? seamsHTML : '';
 
-    if (this.state.preset === 'strip') {
+    if (this.state.showPerimeter) {
+      pVal.innerText = `${exposed} 單位`;
+      pCm.innerText = `${exposed} × 2cm ＝ ${exposed * 2} cm`;
+    } else {
+      pVal.innerText = '❓ 待數邊線';
+      pCm.innerText = '請點擊上方「掃描外露周界」按鈕！';
+    }
+
+    // 文字提示
+    const buriedEdges = internalSeams * 2;
+    if (!this.state.showPerimeter) {
+      tip.style.background = '#f8fafc';
+      tip.style.borderColor = '#cbd5e1';
+      tip.style.color = '#475569';
+      tip.innerHTML = `🧩 <strong>當前拼出 6 個方塊：</strong>面積永遠都是 6 格！請動手點擊上方<strong>「🔍 掃描外露周界」</strong>數一數邊線，或點擊<strong>「✂️ 透視肚裡藏邊」</strong>看看接縫吞掉了幾條邊！`;
+    } else if (this.state.preset === 'strip') {
       tip.style.background = '#eff6ff';
       tip.style.borderColor = '#93c5fd';
       tip.style.color = '#1e40af';
-      tip.innerHTML = `🐍 <strong>1×6 一字長蛇形：</strong>內縫只有 5 條，絕大部分邊露在外面！外露周界高達 <strong>14 單位（28 cm）</strong>！周界最長！`;
+      tip.innerHTML = `🐍 <strong>1×6 一字長蛇形：</strong>相鄰接縫只有 <strong>${internalSeams} 條</strong>（吞掉 ${buriedEdges} 條邊）！外露周界高達 <strong>24 − ${buriedEdges} ＝ 14 單位（28 cm）</strong>！展開最長！`;
     } else if (this.state.preset === 'rect') {
       tip.style.background = '#ecfdf5';
       tip.style.borderColor = '#86efac';
       tip.style.color = '#065f46';
-      tip.innerHTML = `📦 <strong>2×3 緊湊長方形：</strong>相鄰內縫高達 7 條！7 條接縫把 14 條邊<strong>「藏進肚子裡」</strong>了！外圍周界驟降至 <strong>10 單位（20 cm）</strong>！周界最短！`;
+      tip.innerHTML = `📦 <strong>2×3 緊湊長方形：</strong>相鄰接縫高達 <strong>${internalSeams} 條</strong>！把足足 <strong>${buriedEdges} 條邊藏進肚子裡</strong>了！外露周界驟降至 <strong>24 − ${buriedEdges} ＝ 10 單位（20 cm）</strong>！周界最短！`;
     } else {
       tip.style.background = '#fffbeb';
       tip.style.borderColor = '#fde68a';
       tip.style.color = '#92400e';
-      tip.innerHTML = `🦎 <strong>L 形變形獸：</strong>面積依然是 6 格，但凹凸外緣讓周界變為 <strong>12 單位（24 cm）</strong>！面積相同，周界隨造型劇變！`;
+      tip.innerHTML = `🦎 <strong>L 形變形獸：</strong>相鄰接縫有 <strong>${internalSeams} 條</strong>（吞掉 ${buriedEdges} 條邊），外圍周界為 <strong>${exposed} 單位（${exposed * 2} cm）</strong>！面積相同，形狀越緊湊周界越短！`;
     }
 
     if (window.ipadApp) {
