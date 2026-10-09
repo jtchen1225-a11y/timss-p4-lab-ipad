@@ -1,6 +1,6 @@
 /**
- * lab08.js - 第 8 週：【俄羅斯方塊變形獸】 (LAB-W08-MG-AREA) - iPad 優化版 (動手探索邊長與肚裡藏邊)
- * 測量與幾何 ｜ 推理 Reasoning ｜ 無劇透按鈕、面積守恆、外露邊線動態掃描、肚裡藏邊透視
+ * lab08.js - 第 8 週：【俄羅斯方塊變形獸】 (LAB-W08-MG-AREA) - iPad 優化版
+ * 教師引導 ➔ 學生主動探究 ➔ 任務切換立即歸零待測
  */
 
 window.TIMSS_LABS = window.TIMSS_LABS || {};
@@ -16,8 +16,8 @@ window.TIMSS_LABS['W08'] = {
   activeRole: '🔴 操作員(D) 拼擺不同怪獸 ➔ 🟢 發言人(B) 解密肚裡藏邊',
 
   state: {
-    preset: 'strip',
-    showPerimeter: false, // 初始不劇透周界，等待學生動手探索！
+    mission: 'strip', // 'strip', 'rect', 'lshape'
+    showPerimeter: false,
     showSeams: false,
     blocks: []
   },
@@ -32,17 +32,38 @@ window.TIMSS_LABS['W08'] = {
 
   render(container) {
     this.container = container;
-    this.state = { preset: 'strip', showPerimeter: false, showSeams: false, blocks: [] };
+    this.state = { mission: 'strip', showPerimeter: false, showSeams: false, blocks: [] };
     this.setPreset('strip');
 
     container.innerHTML = `
+      <!-- 任務切換列：點擊任何任務立即歸零 -->
       <div class="ipad-controls-bar">
         <div class="controls-left-group">
-          <button class="touch-btn primary" id="w08-btn-s">🐍 造型 A：1×6 一字長蛇</button>
-          <button class="touch-btn" id="w08-btn-r">📦 造型 B：2×3 矩形</button>
-          <button class="touch-btn" id="w08-btn-l">🦎 造型 C：L 形變形獸</button>
+          <button class="touch-btn primary" id="w08-tab-s">🐍 任務一：1×6 一字長蛇形</button>
+          <button class="touch-btn" id="w08-tab-r">📦 任務二：2×3 緊湊矩形</button>
+          <button class="touch-btn" id="w08-tab-l">🦎 任務三：L 形變形獸</button>
         </div>
-        <div style="display:flex; gap:8px;">
+        <button class="touch-btn" id="w08-btn-reset">🔄 當前造型歸零待數</button>
+      </div>
+
+      <!-- 👨‍🏫 教師引導與學生探究導引條 -->
+      <div class="teacher-guide-banner" id="w08-guide-banner">
+        <div class="guide-header-row">
+          <span class="guide-step-tag" id="w08-guide-tag">👨‍🏫 老師引導 ➔ 第 1 步 / 共 2 步</span>
+          <span class="guide-mission-title" id="w08-guide-title">任務一：1×6 一字長蛇形</span>
+        </div>
+        <div class="guide-instruction-text" id="w08-guide-text">
+          磁板上排出了 6 個方格的一字長蛇。面積恆為 6 格。請操作員點擊下方<strong>「🔍 掃描外露周界 (數外邊)」</strong>，親手數數外圍周界！
+        </div>
+        <div class="guide-hint-subtext" id="w08-guide-sub">
+          💡 目前外圍周界處於隱藏待數狀態。
+        </div>
+      </div>
+
+      <!-- 操作按鈕列 -->
+      <div class="ipad-controls-bar" style="background:#f8fafc;">
+        <span style="font-weight:bold; color:#334155;">動手探究工具：</span>
+        <div style="display:flex; gap:10px;">
           <button class="touch-btn primary" id="w08-btn-scan">🔍 掃描外露周界 (數外邊)</button>
           <button class="touch-btn warning" id="w08-btn-seams">✂️ 透視「肚裡藏邊」接縫</button>
         </div>
@@ -71,13 +92,11 @@ window.TIMSS_LABS['W08'] = {
 
           <div style="flex:1; background:#eff6ff; border:2.5px solid #3b82f6; border-radius:12px; padding:12px; text-align:center;">
             <div style="font-size:0.85rem; color:#1d4ed8; font-weight:bold;">🧶 外圍周界 (外露邊長)</div>
-            <div style="font-size:1.8rem; font-weight:900; color:#2563eb;" id="w08-p-val">待數邊線</div>
+            <div style="font-size:1.8rem; font-weight:900; color:#2563eb;" id="w08-p-val">❓ 待數邊線</div>
             <span style="font-size:0.8rem; color:#1d4ed8;" id="w08-p-cm">點擊上方「掃描外露周界」揭曉</span>
           </div>
         </div>
       </div>
-
-      <div id="w08-tip-box" style="margin-top:12px; background:#eff6ff; border:1.5px solid #93c5fd; border-radius:10px; padding:12px 16px; font-size:0.95rem; color:#1e40af;"></div>
     `;
 
     this.bindEvents();
@@ -85,7 +104,7 @@ window.TIMSS_LABS['W08'] = {
   },
 
   setPreset(type) {
-    this.state.preset = type;
+    this.state.mission = type;
     if (type === 'strip') {
       this.state.blocks = [
         { r: 3, c: 3 }, { r: 3, c: 4 }, { r: 3, c: 5 },
@@ -105,50 +124,74 @@ window.TIMSS_LABS['W08'] = {
   },
 
   bindEvents() {
-    const bind = (id, type) => {
+    const bind = (id, fn) => {
       const el = document.getElementById(id);
-      if (el) {
-        el.addEventListener('click', () => {
-          ['w08-btn-s', 'w08-btn-r', 'w08-btn-l'].forEach(b => document.getElementById(b)?.classList.remove('primary'));
-          el.classList.add('primary');
-          this.setPreset(type);
-          this.state.showPerimeter = false;
-          this.state.showSeams = false;
-          window.soundFx.stampThud();
-          this.update();
-        });
-      }
+      if (el) el.addEventListener('click', fn);
     };
 
-    bind('w08-btn-s', 'strip');
-    bind('w08-btn-r', 'rect');
-    bind('w08-btn-l', 'lshape');
+    // 任務切換：一律歸零待數！
+    bind('w08-tab-s', () => {
+      this.setPreset('strip');
+      this.state.showPerimeter = false;
+      this.state.showSeams = false;
+      this.updateTabs('w08-tab-s');
+      window.soundFx.stampThud();
+      this.update();
+    });
+
+    bind('w08-tab-r', () => {
+      this.setPreset('rect');
+      this.state.showPerimeter = false;
+      this.state.showSeams = false;
+      this.updateTabs('w08-tab-r');
+      window.soundFx.stampThud();
+      this.update();
+    });
+
+    bind('w08-tab-l', () => {
+      this.setPreset('lshape');
+      this.state.showPerimeter = false;
+      this.state.showSeams = false;
+      this.updateTabs('w08-tab-l');
+      window.soundFx.stampThud();
+      this.update();
+    });
+
+    bind('w08-btn-reset', () => {
+      this.state.showPerimeter = false;
+      this.state.showSeams = false;
+      window.soundFx.click();
+      this.update();
+    });
 
     // 掃描外露周界
-    const btnScan = document.getElementById('w08-btn-scan');
-    if (btnScan) {
-      btnScan.addEventListener('click', () => {
-        this.state.showPerimeter = true;
-        window.soundFx.balanceChime();
-        this.update();
-      });
-    }
+    bind('w08-btn-scan', () => {
+      this.state.showPerimeter = true;
+      window.soundFx.balanceChime();
+      this.update();
+    });
 
-    // 透視肚裡藏邊
-    const btnSeams = document.getElementById('w08-btn-seams');
-    if (btnSeams) {
-      btnSeams.addEventListener('click', () => {
-        this.state.showSeams = !this.state.showSeams;
-        window.soundFx.click();
-        this.update();
-      });
-    }
+    // 透視接縫
+    bind('w08-btn-seams', () => {
+      this.state.showSeams = !this.state.showSeams;
+      window.soundFx.click();
+      this.update();
+    });
+  },
+
+  updateTabs(activeId) {
+    ['w08-tab-s', 'w08-tab-r', 'w08-tab-l'].forEach(id => {
+      const b = document.getElementById(id);
+      if (b) {
+        if (id === activeId) b.classList.add('primary');
+        else b.classList.remove('primary');
+      }
+    });
   },
 
   update() {
     const g = document.getElementById('w08-blocks-g');
     const seamsG = document.getElementById('w08-seams-g');
-    const tip = document.getElementById('w08-tip-box');
     const pVal = document.getElementById('w08-p-val');
     const pCm = document.getElementById('w08-p-cm');
 
@@ -169,25 +212,19 @@ window.TIMSS_LABS['W08'] = {
         <text x="${x + sz / 2}" y="${y + sz / 2 + 5}" font-size="15" fill="#78350f" font-weight="900" text-anchor="middle">${i + 1}</text>
       `;
 
-      // 檢查 4 條邊
+      // 檢查外露邊
       [[-1, 0], [1, 0], [0, -1], [0, 1]].forEach(([dr, dc]) => {
-        if (!set.has(`${b.r + dr},${b.c + dc}`)) {
-          exposed++;
-        }
+        if (!set.has(`${b.r + dr},${b.c + dc}`)) exposed++;
       });
 
-      // 檢查內部重合接縫 (向右與向下，避免重複計數)
+      // 檢查內部接縫
       if (set.has(`${b.r},${b.c + 1}`)) {
         internalSeams++;
-        seamsHTML += `
-          <line x1="${x + sz}" y1="${y}" x2="${x + sz}" y2="${y + sz}" stroke="#ef4444" stroke-width="4" stroke-dasharray="3,3" />
-        `;
+        seamsHTML += `<line x1="${x + sz}" y1="${y}" x2="${x + sz}" y2="${y + sz}" stroke="#ef4444" stroke-width="4" stroke-dasharray="3,3" />`;
       }
       if (set.has(`${b.r + 1},${b.c}`)) {
         internalSeams++;
-        seamsHTML += `
-          <line x1="${x}" y1="${y + sz}" x2="${x + sz}" y2="${y + sz}" stroke="#ef4444" stroke-width="4" stroke-dasharray="3,3" />
-        `;
+        seamsHTML += `<line x1="${x}" y1="${y + sz}" x2="${x + sz}" y2="${y + sz}" stroke="#ef4444" stroke-width="4" stroke-dasharray="3,3" />`;
       }
     });
 
@@ -202,28 +239,67 @@ window.TIMSS_LABS['W08'] = {
       pCm.innerText = '請點擊上方「掃描外露周界」按鈕！';
     }
 
-    // 文字提示
+    // 導引條更新
+    const guideTag = document.getElementById('w08-guide-tag');
+    const guideTitle = document.getElementById('w08-guide-title');
+    const guideText = document.getElementById('w08-guide-text');
+    const guideSub = document.getElementById('w08-guide-sub');
     const buriedEdges = internalSeams * 2;
-    if (!this.state.showPerimeter) {
-      tip.style.background = '#f8fafc';
-      tip.style.borderColor = '#cbd5e1';
-      tip.style.color = '#475569';
-      tip.innerHTML = `🧩 <strong>當前拼出 6 個方塊：</strong>面積永遠都是 6 格！請動手點擊上方<strong>「🔍 掃描外露周界」</strong>數一數邊線，或點擊<strong>「✂️ 透視肚裡藏邊」</strong>看看接縫吞掉了幾條邊！`;
-    } else if (this.state.preset === 'strip') {
-      tip.style.background = '#eff6ff';
-      tip.style.borderColor = '#93c5fd';
-      tip.style.color = '#1e40af';
-      tip.innerHTML = `🐍 <strong>1×6 一字長蛇形：</strong>相鄰接縫只有 <strong>${internalSeams} 條</strong>（吞掉 ${buriedEdges} 條邊）！外露周界高達 <strong>24 − ${buriedEdges} ＝ 14 單位（28 cm）</strong>！展開最長！`;
-    } else if (this.state.preset === 'rect') {
-      tip.style.background = '#ecfdf5';
-      tip.style.borderColor = '#86efac';
-      tip.style.color = '#065f46';
-      tip.innerHTML = `📦 <strong>2×3 緊湊長方形：</strong>相鄰接縫高達 <strong>${internalSeams} 條</strong>！把足足 <strong>${buriedEdges} 條邊藏進肚子裡</strong>了！外露周界驟降至 <strong>24 − ${buriedEdges} ＝ 10 單位（20 cm）</strong>！周界最短！`;
-    } else {
-      tip.style.background = '#fffbeb';
-      tip.style.borderColor = '#fde68a';
-      tip.style.color = '#92400e';
-      tip.innerHTML = `🦎 <strong>L 形變形獸：</strong>相鄰接縫有 <strong>${internalSeams} 條</strong>（吞掉 ${buriedEdges} 條邊），外圍周界為 <strong>${exposed} 單位（${exposed * 2} cm）</strong>！面積相同，形狀越緊湊周界越短！`;
+
+    if (this.state.mission === 'strip') {
+      guideTitle.innerText = '任務一：1×6 一字長蛇形';
+
+      if (!this.state.showPerimeter) {
+        guideTag.className = 'guide-step-tag';
+        guideTag.innerText = '👨‍🏫 老師引導 ➔ 第 1 步 / 共 2 步';
+        guideText.innerHTML = `6 塊方格排成一字長蛇形。面積是幾格？（6格）。請操作員點擊上方<strong>「🔍 掃描外露周界 (數外邊)」</strong>數一數！`;
+        guideSub.innerText = '💡 目前周界隱藏，讓學生先數數看外面有多少條邊。';
+      } else if (!this.state.showSeams) {
+        guideTag.className = 'guide-step-tag step-alert';
+        guideTag.innerText = '👨‍🏫 老師引導 ➔ 第 2 步：透視接縫';
+        guideText.innerHTML = `外露周界高達 <strong>14 單位 (28cm)</strong>！請操作員點擊<strong>「✂️ 透視「肚裡藏邊」接縫」</strong>，看看相鄰接縫藏了幾條邊！`;
+        guideSub.innerText = '💡 原始 6 塊方塊有 24 條邊，接縫吞掉了幾條邊？';
+      } else {
+        guideTag.className = 'guide-step-tag step-done';
+        guideTag.innerText = '🎉 探究結論 ➔ 一字形周界最長！';
+        guideText.innerHTML = `相鄰接縫只有 <strong>${internalSeams} 條</strong>（吞掉 ${buriedEdges} 條邊）！外露周界為 <strong>24 − ${buriedEdges} ＝ 14 單位（28 cm）</strong>！展開越散，周界越長！`;
+        guideSub.innerText = '🎯 教師金句：拼塊不增面積同，內部貼合吞邊線！';
+      }
+
+    } else if (this.state.mission === 'rect') {
+      guideTitle.innerText = '任務二：2×3 緊湊矩形 (對比挑戰)';
+
+      if (!this.state.showPerimeter) {
+        guideTag.className = 'guide-step-tag step-alert';
+        guideTag.innerText = '👨‍🏫 老師引導 ➔ 猜想周界變化';
+        guideText.innerHTML = `同樣用這 6 塊拼成 2×3 緊湊長方形。面積依然是 6 格！<strong>請全班猜測：周界會變長、不變、還是變短？</strong>請點擊<strong>「🔍 掃描外露周界」</strong>驗證！`;
+        guideSub.innerText = '💡 請全班舉手表決，再揭曉周界！';
+      } else if (!this.state.showSeams) {
+        guideTag.className = 'guide-step-tag step-alert';
+        guideTag.innerText = '👨‍🏫 老師引導 ➔ 揭秘周界縮水原因';
+        guideText.innerHTML = `周界驟降至 <strong>10 單位 (20cm)</strong>！為什麼周界少了 4 單位？請操作員點擊<strong>「✂️ 透視「肚裡藏邊」接縫」</strong>！`;
+        guideSub.innerText = '💡 學生點擊後將看到紅色虛線接縫大幅增加。';
+      } else {
+        guideTag.className = 'guide-step-tag step-done';
+        guideTag.innerText = '🎉 探究結論 ➔ 越緊湊周界越短！';
+        guideText.innerHTML = `相鄰接縫高達 <strong>${internalSeams} 條</strong>！把足足 <strong>${buriedEdges} 條邊藏進肚子裡</strong>了！外露周界只有 <strong>24 − ${buriedEdges} ＝ 10 單位（20 cm）</strong>！周界最短！`;
+        guideSub.innerText = '🎯 教師金句：越緊湊者接縫多，吞邊越多周越短！';
+      }
+
+    } else if (this.state.mission === 'lshape') {
+      guideTitle.innerText = '任務三：L 形變形獸 (凹凸形狀)';
+
+      if (!this.state.showPerimeter) {
+        guideTag.className = 'guide-step-tag';
+        guideTag.innerText = '👨‍🏫 老師引導 ➔ 凹凸造型測量';
+        guideText.innerHTML = `拼成 L 形怪獸。面積依然是 6 格！請操作員點擊<strong>「🔍 掃描外露周界」</strong>，數數凹凸外緣的周界是多少！`;
+        guideSub.innerText = '💡 觀察轉角凹凸對周界的影響。';
+      } else {
+        guideTag.className = 'guide-step-tag step-done';
+        guideTag.innerText = '🎉 探究結論 ➔ 周界 12 單位';
+        guideText.innerHTML = `相鄰接縫有 <strong>${internalSeams} 條</strong>（吞掉 ${buriedEdges} 條邊），外圍周界為 <strong>24 − ${buriedEdges} ＝ ${exposed} 單位（${exposed * 2} cm）</strong>！面積相同，形狀不同周界截然不同！`;
+        guideSub.innerText = '🎯 教師金句：面積守恆周界變，形狀千變見真章！';
+      }
     }
 
     if (window.ipadApp) {

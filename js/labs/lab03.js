@@ -1,6 +1,6 @@
 /**
- * lab03.js - 第 3 週：【魔術折紙與雙尺滑行】 (LAB-W03-MG-LINE) - iPad 優化版 (動手滑尺畫線與逐步折紙)
- * 測量與幾何 ｜ 知識 Knowing ｜ 平移三角板、動態畫第二條軌、卡尺等距驗證、4步折紙
+ * lab03.js - 第 3 週：【魔術折紙與雙尺滑行】 (LAB-W03-MG-LINE) - iPad 優化版
+ * 教師引導 ➔ 學生主動探究 ➔ 任務切換立即歸零待測
  */
 
 window.TIMSS_LABS = window.TIMSS_LABS || {};
@@ -16,9 +16,9 @@ window.TIMSS_LABS['W03'] = {
   activeRole: '🔴 操作員(D) 滑動三角板 ➔ 🟣 質疑員(A) 旋轉傾角驗證不相交',
 
   state: {
-    tab: 'ruler',
+    mission: 'ruler', // 'ruler', 'origami'
     angle: 20,
-    pos: 120,
+    pos: 100, // 初始在最左邊起點
     line2Drawn: false,
     calipersShown: false,
     origamiStep: 0
@@ -35,33 +35,48 @@ window.TIMSS_LABS['W03'] = {
   render(container) {
     this.container = container;
     this.state = {
-      tab: 'ruler',
+      mission: 'ruler',
       angle: 20,
-      pos: 120,
+      pos: 100,
       line2Drawn: false,
       calipersShown: false,
       origamiStep: 0
     };
 
     container.innerHTML = `
+      <!-- 任務切換列：點擊任何任務立即歸零 -->
       <div class="ipad-controls-bar">
         <div class="controls-left-group">
-          <button class="touch-btn primary" id="w03-tab-ruler">📐 實驗一：雙尺滑動平行線</button>
-          <button class="touch-btn" id="w03-tab-origami">📄 實驗二：魔術折紙生直角</button>
+          <button class="touch-btn primary" id="w03-tab-ruler">📐 任務一：雙尺滑動平行線</button>
+          <button class="touch-btn" id="w03-tab-origami">📄 任務二：魔術折紙生直角</button>
         </div>
-        <button class="touch-btn" id="w03-btn-reset-all">🔄 重置歸零實驗</button>
+        <button class="touch-btn" id="w03-btn-reset">🔄 當前任務歸零待測</button>
+      </div>
+
+      <!-- 👨‍🏫 教師引導與學生探究導引條 -->
+      <div class="teacher-guide-banner" id="w03-guide-banner">
+        <div class="guide-header-row">
+          <span class="guide-step-tag" id="w03-guide-tag">👨‍🏫 老師引導 ➔ 第 1 步 / 共 3 步</span>
+          <span class="guide-mission-title" id="w03-guide-title">任務一：雙尺滑動平行線</span>
+        </div>
+        <div class="guide-instruction-text" id="w03-guide-text">
+          底尺固定，三角板在起始位置已畫好鐵軌 1。請操作員拖動<strong>【平移三角板】</strong>滑桿，將三角板向右滑動！
+        </div>
+        <div class="guide-hint-subtext" id="w03-guide-sub">
+          💡 三角板初始在起點，第二條鐵軌尚未繪出，等待學生動手操作。
+        </div>
       </div>
 
       <!-- 實驗一：雙尺滑動舞台 -->
       <div id="w03-view-ruler">
         <div class="ipad-controls-bar" style="background:#f8fafc; border-color:#e2e8f0;">
           <div style="display:flex; align-items:center; gap:8px;">
-            <label style="font-weight:bold;">🔄 旋轉底尺傾角：<span id="w03-angle-num" style="color:var(--primary); font-size:1.1rem;">20</span>°</label>
-            <input type="range" class="touch-slider" id="w03-slider-angle" min="0" max="50" value="20" step="5" style="width:140px;">
+            <label style="font-weight:bold;">📐 平移三角板：</label>
+            <input type="range" class="touch-slider" id="w03-slider-pos" min="100" max="320" value="100" step="10" style="width:160px;">
           </div>
           <div style="display:flex; align-items:center; gap:8px;">
-            <label style="font-weight:bold;">📐 平移三角板：</label>
-            <input type="range" class="touch-slider" id="w03-slider-pos" min="60" max="320" value="120" step="10" style="width:160px;">
+            <label style="font-weight:bold;">🔄 旋轉底尺傾角：<span id="w03-angle-num" style="color:var(--primary); font-size:1.1rem;">20</span>°</label>
+            <input type="range" class="touch-slider" id="w03-slider-angle" min="0" max="50" value="20" step="5" style="width:130px;">
           </div>
           <div style="display:flex; gap:8px;">
             <button class="touch-btn primary" id="w03-btn-draw-line2">✏️ 沿邊畫第二條鐵軌</button>
@@ -105,7 +120,7 @@ window.TIMSS_LABS['W03'] = {
               </g>
 
               <!-- 滑動三角板 -->
-              <g id="w03-tri" transform="translate(120, 0)">
+              <g id="w03-tri" transform="translate(100, 0)">
                 <polygon points="100,210 220,210 100,50" fill="rgba(96, 165, 250, 0.6)" stroke="#1d4ed8" stroke-width="2.5" />
                 <rect x="100" y="196" width="14" height="14" fill="none" stroke="#1d4ed8" stroke-width="2" />
                 <text x="145" y="140" fill="#1e3a8a" font-size="12" font-weight="bold">滑動三角板</text>
@@ -113,22 +128,20 @@ window.TIMSS_LABS['W03'] = {
             </g>
           </svg>
         </div>
-
-        <div id="w03-ruler-verdict" style="margin-top:10px; background:#eff6ff; border:1.5px solid #bfdbfe; border-radius:10px; padding:10px 14px; font-size:0.9rem; color:#1e40af;"></div>
       </div>
 
       <!-- 實驗二：魔術折紙舞台 -->
       <div id="w03-view-origami" style="display:none;">
         <div class="ipad-controls-bar">
           <button class="touch-btn primary" id="w03-btn-ori-next">👉 進行下一步對折</button>
-          <button class="touch-btn" id="w03-btn-ori-reset">🔄 重新展開原紙</button>
+          <button class="touch-btn" id="w03-btn-ori-reset">🔄 展開為原始紙張</button>
           <span id="w03-ori-status" style="font-weight:bold; color:#0284c7; font-size:0.95rem;">步驟 0：不規則平整紙張</span>
         </div>
 
         <div style="background:#f1f5f9; border-radius:12px; padding:24px; min-height:340px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
           <div id="w03-ori-box" style="width:240px; height:240px; background:#fef08a; border:3px solid #ca8a04; position:relative; box-shadow:0 8px 20px rgba(0,0,0,0.15); transition:all 0.5s;"></div>
           <div id="w03-ori-desc" style="margin-top:16px; font-size:1rem; font-weight:bold; color:#1e293b;">
-            步驟 0：拿一張不規則白紙（不需要正方形，任意形狀皆可）。
+            步驟 0：拿一張不規則白紙（任意形狀皆可，無需直角）。
           </div>
         </div>
       </div>
@@ -144,25 +157,56 @@ window.TIMSS_LABS['W03'] = {
       if (el) el.addEventListener('click', fn);
     };
 
+    // 任務切換：一律歸零待測！
     bind('w03-tab-ruler', () => {
-      this.state.tab = 'ruler';
-      document.getElementById('w03-tab-ruler').className = 'touch-btn primary';
-      document.getElementById('w03-tab-origami').className = 'touch-btn';
+      this.state.mission = 'ruler';
+      this.state.pos = 100;
+      this.state.line2Drawn = false;
+      this.state.calipersShown = false;
+      this.updateTabs('w03-tab-ruler');
       document.getElementById('w03-view-ruler').style.display = 'block';
       document.getElementById('w03-view-origami').style.display = 'none';
       window.soundFx.click();
+      this.update();
     });
 
     bind('w03-tab-origami', () => {
-      this.state.tab = 'origami';
-      document.getElementById('w03-tab-ruler').className = 'touch-btn';
-      document.getElementById('w03-tab-origami').className = 'touch-btn primary';
+      this.state.mission = 'origami';
+      this.state.origamiStep = 0;
+      this.updateTabs('w03-tab-origami');
       document.getElementById('w03-view-ruler').style.display = 'none';
       document.getElementById('w03-view-origami').style.display = 'block';
       window.soundFx.click();
       this.updateOrigami();
+      this.update();
     });
 
+    bind('w03-btn-reset', () => {
+      if (this.state.mission === 'ruler') {
+        this.state.pos = 100;
+        this.state.line2Drawn = false;
+        this.state.calipersShown = false;
+        document.getElementById('w03-slider-pos').value = '100';
+      } else {
+        this.state.origamiStep = 0;
+        this.updateOrigami();
+      }
+      window.soundFx.click();
+      this.update();
+    });
+
+    // 滑桿平移
+    const posSlider = document.getElementById('w03-slider-pos');
+    if (posSlider) {
+      posSlider.addEventListener('input', (e) => {
+        this.state.pos = parseInt(e.target.value);
+        const tri = document.getElementById('w03-tri');
+        if (tri) tri.setAttribute('transform', `translate(${this.state.pos}, 0)`);
+        this.update();
+      });
+    }
+
+    // 傾角旋轉
     const angleSlider = document.getElementById('w03-slider-angle');
     if (angleSlider) {
       angleSlider.addEventListener('input', (e) => {
@@ -173,25 +217,16 @@ window.TIMSS_LABS['W03'] = {
       });
     }
 
-    const posSlider = document.getElementById('w03-slider-pos');
-    if (posSlider) {
-      posSlider.addEventListener('input', (e) => {
-        this.state.pos = parseInt(e.target.value);
-        const tri = document.getElementById('w03-tri');
-        if (tri) tri.setAttribute('transform', `translate(${this.state.pos}, 0)`);
-      });
-    }
-
     // 畫第二條軌
     bind('w03-btn-draw-line2', () => {
       this.state.line2Drawn = true;
       const l2 = document.getElementById('w03-line2-g');
       if (l2) l2.style.display = 'block';
       window.soundFx.balanceChime();
-      this.updateRulerVerdict();
+      this.update();
     });
 
-    // 切換卡尺
+    // 卡尺測量
     bind('w03-btn-caliper', () => {
       if (!this.state.line2Drawn) {
         window.soundFx.tiltBuzz();
@@ -202,66 +237,104 @@ window.TIMSS_LABS['W03'] = {
       const c = document.getElementById('w03-calipers-g');
       if (c) c.style.display = this.state.calipersShown ? 'block' : 'none';
       window.soundFx.stampThud();
-      this.updateRulerVerdict();
+      this.update();
     });
 
+    // 折紙按鈕
     bind('w03-btn-ori-next', () => {
       this.state.origamiStep = (this.state.origamiStep + 1) % 4;
       window.soundFx.stampThud();
       this.updateOrigami();
+      this.update();
     });
 
     bind('w03-btn-ori-reset', () => {
       this.state.origamiStep = 0;
       window.soundFx.click();
       this.updateOrigami();
-    });
-
-    bind('w03-btn-reset-all', () => {
-      this.state = {
-        tab: this.state.tab,
-        angle: 20,
-        pos: 120,
-        line2Drawn: false,
-        calipersShown: false,
-        origamiStep: 0
-      };
-      const l2 = document.getElementById('w03-line2-g');
-      if (l2) l2.style.display = 'none';
-      const c = document.getElementById('w03-calipers-g');
-      if (c) c.style.display = 'none';
-      const tri = document.getElementById('w03-tri');
-      if (tri) tri.setAttribute('transform', 'translate(120, 0)');
-      const g = document.getElementById('w03-rot');
-      if (g) g.setAttribute('transform', 'rotate(20, 350, 190)');
-      document.getElementById('w03-angle-num').innerText = '20';
-      document.getElementById('w03-slider-angle').value = '20';
-      document.getElementById('w03-slider-pos').value = '120';
-      window.soundFx.click();
-      this.updateRulerVerdict();
-      this.updateOrigami();
+      this.update();
     });
   },
 
-  updateRulerVerdict() {
-    const box = document.getElementById('w03-ruler-verdict');
-    if (!box) return;
+  updateTabs(activeId) {
+    ['w03-tab-ruler', 'w03-tab-origami'].forEach(id => {
+      const b = document.getElementById(id);
+      if (b) {
+        if (id === activeId) b.classList.add('primary');
+        else b.classList.remove('primary');
+      }
+    });
+  },
 
-    if (!this.state.line2Drawn) {
-      box.style.background = '#f8fafc';
-      box.style.borderColor = '#cbd5e1';
-      box.style.color = '#475569';
-      box.innerHTML = `👉 <strong>實驗步驟：</strong>1. 拖動「平移三角板」滑桿滑動三角板 ➔ 2. 點擊「<strong>✏️ 沿邊畫第二條鐵軌</strong>」畫出新線段！`;
-    } else if (!this.state.calipersShown) {
-      box.style.background = '#eff6ff';
-      box.style.borderColor = '#93c5fd';
-      box.style.color = '#1e40af';
-      box.innerHTML = `✏️ <strong>第二條鐵軌已畫出！</strong>小明懷疑這兩條斜線無限延長會相交。請點擊「<strong>📏 卡尺測量間距</strong>」進行檢驗！`;
+  update() {
+    const guideTag = document.getElementById('w03-guide-tag');
+    const guideTitle = document.getElementById('w03-guide-title');
+    const guideText = document.getElementById('w03-guide-text');
+    const guideSub = document.getElementById('w03-guide-sub');
+
+    // 三角板位置更新
+    const tri = document.getElementById('w03-tri');
+    if (tri) tri.setAttribute('transform', `translate(${this.state.pos}, 0)`);
+
+    const l2 = document.getElementById('w03-line2-g');
+    if (l2) l2.style.display = this.state.line2Drawn ? 'block' : 'none';
+
+    const c = document.getElementById('w03-calipers-g');
+    if (c) c.style.display = this.state.calipersShown ? 'block' : 'none';
+
+    if (this.state.mission === 'ruler') {
+      guideTitle.innerText = '任務一：雙尺滑動平行線';
+
+      if (this.state.pos < 160 && !this.state.line2Drawn) {
+        guideTag.className = 'guide-step-tag';
+        guideTag.innerText = '👨‍🏫 老師引導 ➔ 第 1 步 / 共 3 步';
+        guideText.innerHTML = `底尺緊壓桌面固定，直角邊已畫出鐵軌 1。請操作員拖動上方<strong>【平移三角板】</strong>滑桿，將三角板向右滑動！`;
+        guideSub.innerText = '💡 請學生觀察三角板是如何貼緊底尺平移滑動的。';
+      } else if (!this.state.line2Drawn) {
+        guideTag.className = 'guide-step-tag step-alert';
+        guideTag.innerText = '👨‍🏫 老師引導 ➔ 第 2 步 / 共 3 步';
+        guideText.innerHTML = `三角板已平移到位！請操作員點擊上方<strong>「✏️ 沿邊畫第二條鐵軌」</strong>，畫出第二條線段！`;
+        guideSub.innerText = '💡 學生點擊後將沿著直角邊繪出綠色鐵軌線。';
+      } else if (!this.state.calipersShown) {
+        guideTag.className = 'guide-step-tag step-alert';
+        guideTag.innerText = '👨‍🏫 老師引導 ➔ 第 3 步 / 共 3 步';
+        guideText.innerHTML = `第二條鐵軌已畫出！看起來斜斜的，小明質疑無限延長會相交。請操作員點擊<strong>「📏 卡尺測量間距」</strong>檢驗垂直距離！`;
+        guideSub.innerText = '💡 請全班大膽質疑：斜斜的線真的永遠不會相交嗎？';
+      } else {
+        guideTag.className = 'guide-step-tag step-done';
+        guideTag.innerText = '🎉 探究結論 ➔ 處處等距即平行！';
+        guideText.innerHTML = `<strong>左、中、右垂直間距處處相等 (4.5cm)！</strong>試著拖動【旋轉底尺傾角】滑桿，兩線始終等距，永遠不可能相交！`;
+        guideSub.innerText = '🎯 教師金句：平不平行看距離，處處等距即平行，斜著也是平行線！';
+      }
+
     } else {
-      box.style.background = '#ecfdf5';
-      box.style.borderColor = '#86efac';
-      box.style.color = '#065f46';
-      box.innerHTML = `✅ <strong>幾何檢驗真相大白：</strong>左端 $d_1=4.5\\text{cm}$、中間 $d_2=4.5\\text{cm}$、右端 $d_3=4.5\\text{cm}$！三處垂直距離<strong>處處相等</strong>！試著旋轉上方傾角滑桿，兩線始終等距，永遠不可能相交！`;
+      guideTitle.innerText = '任務二：魔術折紙生直角';
+
+      if (this.state.origamiStep === 0) {
+        guideTag.className = 'guide-step-tag';
+        guideTag.innerText = '👨‍🏫 老師引導 ➔ 步驟 0：不規則原紙';
+        guideText.innerHTML = `手頭只有一張不規則白紙（無直角、無標準邊）。小明不信不拿尺也能折出 90° 直角！請點擊<strong>「👉 進行下一步對折」</strong>！`;
+        guideSub.innerText = '💡 任意不規則形狀皆可，無需正方形。';
+      } else if (this.state.origamiStep === 1) {
+        guideTag.className = 'guide-step-tag';
+        guideTag.innerText = '👨‍🏫 老師引導 ➔ 步驟 1：第一次對折';
+        guideText.innerHTML = `沿任意直線橫向對折，壓出一條堅實折痕！這條折線就是一條平角（180°）。請點擊<strong>「👉 進行下一步對折」</strong>！`;
+        guideSub.innerText = '💡 兩次對折中的第一次：創造一條基準平角。';
+      } else if (this.state.origamiStep === 2) {
+        guideTag.className = 'guide-step-tag step-alert';
+        guideTag.innerText = '👨‍🏫 老師引導 ➔ 步驟 2：邊對邊完全重疊！';
+        guideText.innerHTML = `<strong>關鍵手法：</strong>將底邊折痕對齊重疊進行第二次對折！平角 180° 被正好平分！此時夾角已經是 90°！請點擊<strong>「👉 展開驗證直角」</strong>！`;
+        guideSub.innerText = '💡 邊對邊重疊是將平角二等分的幾何保證。';
+      } else {
+        guideTag.className = 'guide-step-tag step-done';
+        guideTag.innerText = '🎉 探究結論 ➔ 360° ÷ 4 ＝ 90°！';
+        guideText.innerHTML = `<strong>十字折痕完美相交於 90° 直角！</strong>兩次對折將一週 360° 均分為 4 份，折出來必是百分之百的直角與垂直線！`;
+        guideSub.innerText = '🎯 教師金句：兩次對折分平角，九十度角定垂直！';
+      }
+    }
+
+    if (window.ipadApp) {
+      window.ipadApp.updateTeacherSummary(this.getTeacherSummary());
     }
   },
 
@@ -273,7 +346,7 @@ window.TIMSS_LABS['W03'] = {
 
     if (this.state.origamiStep === 0) {
       status.innerText = '步驟 0：平整紙張';
-      desc.innerHTML = '步驟 0：拿一張不規則白紙（任意形狀皆可，無需直角）。點擊「下一步對折」開始！';
+      desc.innerHTML = '步驟 0：拿一張不規則白紙（任意形狀皆可，無需直角）。點擊「進行下一步對折」開始！';
       box.style.width = '240px';
       box.style.height = '240px';
       box.innerHTML = '';
@@ -301,13 +374,6 @@ window.TIMSS_LABS['W03'] = {
         <span style="position:absolute; top:130px; left:150px; font-size:14px; font-weight:bold; color:#2563eb;">90° 直角</span>
       `;
       window.soundFx.successFanfare();
-    }
-  },
-
-  update() {
-    this.updateRulerVerdict();
-    if (window.ipadApp) {
-      window.ipadApp.updateTeacherSummary(this.getTeacherSummary());
     }
   },
 

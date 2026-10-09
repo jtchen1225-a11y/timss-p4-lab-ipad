@@ -1,6 +1,6 @@
 /**
- * lab06.js - 第 6 週：【毛線籬笆變形記】 (LAB-W06-MG-PER) - iPad 優化版 (動手拉線與剪貼探索)
- * 測量與幾何 ｜ 應用 Applying ｜ 無劇透按鈕、動態拉線圍籬、靠牆剪邊、留門扣除
+ * lab06.js - 第 6 週：【毛線籬笆變形記】 (LAB-W06-MG-PER) - iPad 優化版
+ * 教師引導 ➔ 學生主動探究 ➔ 任務切換立即歸零待測
  */
 
 window.TIMSS_LABS = window.TIMSS_LABS || {};
@@ -16,10 +16,10 @@ window.TIMSS_LABS['W06'] = {
   activeRole: '🔴 操作員(D) 調整農場尺寸 ➔ 🟣 質疑員(A) 挑戰靠牆周界變化',
 
   state: {
+    mission: 'full', // 'full', 'wall', 'gate', 'wall_gate'
     length: 12,
     width: 8,
-    fenceDeployed: false, // 初始尚未圍籬笆，等學生動手拉線！
-    mode: 'full' // 'full', 'wall', 'gate', 'wall_gate'
+    fenceDeployed: false
   },
 
   getTeacherSummary() {
@@ -38,32 +38,45 @@ window.TIMSS_LABS['W06'] = {
 
   render(container) {
     this.container = container;
-    this.state = { length: 12, width: 8, fenceDeployed: false, mode: 'full' };
+    this.state = { mission: 'full', length: 12, width: 8, fenceDeployed: false };
 
     container.innerHTML = `
+      <!-- 任務切換列：點擊任何任務立即歸零 -->
       <div class="ipad-controls-bar">
         <div class="controls-left-group">
-          <div style="display:flex; align-items:center; gap:8px;">
-            <label style="font-weight:bold;">📏 長度 (L)：<strong id="w06-l-txt" style="color:var(--primary); font-size:1.1rem;">12</strong> cm</label>
-            <input type="range" class="touch-slider" id="w06-l-slider" min="6" max="16" value="12" step="1" style="width:120px;">
-          </div>
-          <div style="display:flex; align-items:center; gap:8px;">
-            <label style="font-weight:bold;">📐 寬度 (W)：<strong id="w06-w-txt" style="color:var(--primary); font-size:1.1rem;">8</strong> cm</label>
-            <input type="range" class="touch-slider" id="w06-w-slider" min="4" max="12" value="8" step="1" style="width:120px;">
-          </div>
+          <button class="touch-btn primary" id="w06-tab-full">🏞️ 任務一：四面全圍籬笆</button>
+          <button class="touch-btn" id="w06-tab-wall">🧱 任務二：長邊改靠現成磚牆</button>
+          <button class="touch-btn" id="w06-tab-gate">🚪 任務三：底邊開闢 3cm 大門</button>
+          <button class="touch-btn" id="w06-tab-both">⭐ 任務四：靠牆 ＋ 留門雙重組合</button>
         </div>
-        <div style="display:flex; gap:8px;">
-          <button class="touch-btn primary" id="w06-btn-deploy">🧶 拉毛線繞一週圍籬笆</button>
-          <button class="touch-btn" id="w06-btn-reset">🔄 重置農場</button>
+        <button class="touch-btn" id="w06-btn-reset">🔄 當前任務歸零待測</button>
+      </div>
+
+      <!-- 👨‍🏫 教師引導與學生探究導引條 -->
+      <div class="teacher-guide-banner" id="w06-guide-banner">
+        <div class="guide-header-row">
+          <span class="guide-step-tag" id="w06-guide-tag">👨‍🏫 老師引導 ➔ 第 1 步 / 共 2 步</span>
+          <span class="guide-mission-title" id="w06-guide-title">任務一：四面全圍籬笆</span>
+        </div>
+        <div class="guide-instruction-text" id="w06-guide-text">
+          農場長 12cm、寬 8cm，四周尚未圍上籬笆。請操作員點擊下方<strong>「🧶 拉毛線繞一週圍籬笆」</strong>，觀察毛線鋪設！
+        </div>
+        <div class="guide-hint-subtext" id="w06-guide-sub">
+          💡 目前尚未拉線，請讓學生動手點擊拉線按鈕。
         </div>
       </div>
 
-      <!-- 情境切換按鈕列 (清除答案劇透) -->
-      <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
-        <button class="touch-btn primary" id="w06-btn-full">🏞️ 情境 A：四面全圍籬笆</button>
-        <button class="touch-btn" id="w06-btn-wall" style="border-color:#b91c1c; color:#b91c1c;">🧱 情境 B：長邊改靠現成磚牆</button>
-        <button class="touch-btn" id="w06-btn-gate" style="border-color:#d97706; color:#d97706;">🚪 情境 C：底邊開闢 3cm 大門</button>
-        <button class="touch-btn" id="w06-btn-wallgate" style="border-color:#7c3aed; color:#7c3aed;">⭐ 情境 D：靠牆 ＋ 留門組合</button>
+      <!-- 農場尺寸滑桿與操作列 -->
+      <div class="ipad-controls-bar" style="background:#f8fafc;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <label style="font-weight:bold;">📏 長 (L)：<strong id="w06-l-txt" style="color:var(--primary); font-size:1.1rem;">12</strong> cm</label>
+          <input type="range" class="touch-slider" id="w06-l-slider" min="6" max="16" value="12" step="1" style="width:120px;">
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <label style="font-weight:bold;">📐 寬 (W)：<strong id="w06-w-txt" style="color:var(--primary); font-size:1.1rem;">8</strong> cm</label>
+          <input type="range" class="touch-slider" id="w06-w-slider" min="4" max="12" value="8" step="1" style="width:120px;">
+        </div>
+        <button class="touch-btn primary" id="w06-btn-deploy" style="font-weight:800;">🧶 拉毛線繞一週圍籬笆</button>
       </div>
 
       <!-- 農場大畫布 -->
@@ -72,9 +85,6 @@ window.TIMSS_LABS['W06'] = {
           <g id="w06-farm-g"></g>
         </svg>
       </div>
-
-      <!-- 解釋與算式文字框 -->
-      <div id="w06-info-box" style="margin-top:12px; background:#ecfdf5; border:1.5px solid #86efac; border-radius:10px; padding:12px 16px; font-size:0.95rem;"></div>
     `;
 
     this.bindEvents();
@@ -82,72 +92,82 @@ window.TIMSS_LABS['W06'] = {
   },
 
   bindEvents() {
-    const lSlider = document.getElementById('w06-l-slider');
-    const wSlider = document.getElementById('w06-w-slider');
+    const bind = (id, fn) => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('click', fn);
+    };
 
+    // 任務切換：一律歸零待測！
+    bind('w06-tab-full', () => {
+      this.state.mission = 'full';
+      this.state.fenceDeployed = false;
+      this.updateTabs('w06-tab-full');
+      window.soundFx.click();
+      this.update();
+    });
+
+    bind('w06-tab-wall', () => {
+      this.state.mission = 'wall';
+      this.state.fenceDeployed = false;
+      this.updateTabs('w06-tab-wall');
+      window.soundFx.click();
+      this.update();
+    });
+
+    bind('w06-tab-gate', () => {
+      this.state.mission = 'gate';
+      this.state.fenceDeployed = false;
+      this.updateTabs('w06-tab-gate');
+      window.soundFx.click();
+      this.update();
+    });
+
+    bind('w06-tab-both', () => {
+      this.state.mission = 'wall_gate';
+      this.state.fenceDeployed = false;
+      this.updateTabs('w06-tab-both');
+      window.soundFx.click();
+      this.update();
+    });
+
+    bind('w06-btn-reset', () => {
+      this.state.fenceDeployed = false;
+      window.soundFx.click();
+      this.update();
+    });
+
+    // 動手拉線 / 應用變形
+    bind('w06-btn-deploy', () => {
+      this.state.fenceDeployed = true;
+      window.soundFx.rubberSnap();
+      this.update();
+    });
+
+    const lSlider = document.getElementById('w06-l-slider');
     if (lSlider) {
       lSlider.addEventListener('input', (e) => {
         this.state.length = parseInt(e.target.value);
-        window.soundFx.click();
         this.update();
       });
     }
 
+    const wSlider = document.getElementById('w06-w-slider');
     if (wSlider) {
       wSlider.addEventListener('input', (e) => {
         this.state.width = parseInt(e.target.value);
-        window.soundFx.click();
         this.update();
       });
     }
+  },
 
-    // 動手拉線
-    const btnDeploy = document.getElementById('w06-btn-deploy');
-    if (btnDeploy) {
-      btnDeploy.addEventListener('click', () => {
-        this.state.fenceDeploy = true;
-        this.state.fenceDeployed = true;
-        window.soundFx.rubberSnap();
-        this.update();
-      });
-    }
-
-    const bindMode = (id, mode) => {
-      const el = document.getElementById(id);
-      if (el) {
-        el.addEventListener('click', () => {
-          this.state.fenceDeployed = true;
-          this.state.mode = mode;
-          ['w06-btn-full', 'w06-btn-wall', 'w06-btn-gate', 'w06-btn-wallgate'].forEach(b => {
-            document.getElementById(b)?.classList.remove('primary');
-          });
-          el.classList.add('primary');
-          window.soundFx.stampThud();
-          this.update();
-        });
+  updateTabs(activeId) {
+    ['w06-tab-full', 'w06-tab-wall', 'w06-tab-gate', 'w06-tab-both'].forEach(id => {
+      const b = document.getElementById(id);
+      if (b) {
+        if (id === activeId) b.classList.add('primary');
+        else b.classList.remove('primary');
       }
-    };
-
-    bindMode('w06-btn-full', 'full');
-    bindMode('w06-btn-wall', 'wall');
-    bindMode('w06-btn-gate', 'gate');
-    bindMode('w06-btn-wallgate', 'wall_gate');
-
-    // 重置
-    const btnReset = document.getElementById('w06-btn-reset');
-    if (btnReset) {
-      btnReset.addEventListener('click', () => {
-        this.state = { length: 12, width: 8, fenceDeployed: false, mode: 'full' };
-        document.getElementById('w06-l-slider').value = '12';
-        document.getElementById('w06-w-slider').value = '8';
-        ['w06-btn-wall', 'w06-btn-gate', 'w06-btn-wallgate'].forEach(b => {
-          document.getElementById(b)?.classList.remove('primary');
-        });
-        document.getElementById('w06-btn-full')?.classList.add('primary');
-        window.soundFx.click();
-        this.update();
-      });
-    }
+    });
   },
 
   update() {
@@ -165,12 +185,11 @@ window.TIMSS_LABS['W06'] = {
     const sy = (320 - rH) / 2;
 
     const g = document.getElementById('w06-farm-g');
-    const info = document.getElementById('w06-info-box');
+    const isDeployed = this.state.fenceDeployed;
+    const isWall = isDeployed && (this.state.mission === 'wall' || this.state.mission === 'wall_gate');
+    const isGate = isDeployed && (this.state.mission === 'gate' || this.state.mission === 'wall_gate');
 
     let needed = full;
-    const isDeployed = this.state.fenceDeployed;
-    const isWall = isDeployed && (this.state.mode === 'wall' || this.state.mode === 'wall_gate');
-    const isGate = isDeployed && (this.state.mode === 'gate' || this.state.mode === 'wall_gate');
 
     let html = `
       <rect x="${sx}" y="${sy}" width="${rW}" height="${rH}" fill="#dcfce7" stroke="#86efac" stroke-width="2.5" rx="6" />
@@ -180,18 +199,16 @@ window.TIMSS_LABS['W06'] = {
     `;
 
     if (!isDeployed) {
-      // 尚未拉線
       html += `
-        <!-- 未拉線虛線邊界 -->
         <rect x="${sx}" y="${sy}" width="${rW}" height="${rH}" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="6,6" rx="6" />
-        <text x="${sx + rW / 2}" y="${sy + rH / 2 + 30}" font-size="12" fill="#64748b" font-weight="bold" text-anchor="middle">四周籬笆尚未鋪設，點擊「拉毛線繞一週」開始！</text>
+        <text x="${sx + rW / 2}" y="${sy + rH / 2 + 30}" font-size="12" fill="#64748b" font-weight="bold" text-anchor="middle">四周籬笆尚未鋪設，點擊下方「拉毛線」開始！</text>
       `;
     } else {
       // 頂邊
       if (isWall) {
         html += `
           <rect x="${sx - 12}" y="${sy - 18}" width="${rW + 24}" height="18" fill="#b91c1c" stroke="#7f1d1d" stroke-width="2" />
-          <text x="${sx + rW / 2}" y="${sy - 5}" font-size="11" fill="white" font-weight="bold" text-anchor="middle">🧱 現成磚牆 (長 ${L} cm 免圍籬笆)</text>
+          <text x="${sx + rW / 2}" y="${sy - 5}" font-size="11" fill="white" font-weight="bold" text-anchor="middle">🧱 現成磚牆 (免圍長邊)</text>
           <path d="M ${sx} ${sy} Q ${sx + rW / 2} ${sy + 35} ${sx + rW} ${sy}" fill="none" stroke="#94a3b8" stroke-width="2.5" stroke-dasharray="4,4" />
         `;
         needed -= L;
@@ -199,7 +216,7 @@ window.TIMSS_LABS['W06'] = {
         html += `<line x1="${sx}" y1="${sy}" x2="${sx + rW}" y2="${sy}" stroke="#ef4444" stroke-width="6" stroke-linecap="round" />`;
       }
 
-      // 左右兩側寬邊
+      // 左右
       html += `<line x1="${sx}" y1="${sy}" x2="${sx}" y2="${sy + rH}" stroke="#ef4444" stroke-width="6" stroke-linecap="round" />`;
       html += `<line x1="${sx + rW}" y1="${sy}" x2="${sx + rW}" y2="${sy + rH}" stroke="#ef4444" stroke-width="6" stroke-linecap="round" />`;
 
@@ -211,7 +228,7 @@ window.TIMSS_LABS['W06'] = {
         html += `
           <line x1="${sx}" y1="${sy + rH}" x2="${gS}" y2="${sy + rH}" stroke="#ef4444" stroke-width="6" stroke-linecap="round" />
           <rect x="${gS}" y="${sy + rH - 5}" width="${gatePx}" height="10" fill="#d97706" rx="3" />
-          <text x="${(gS + gE) / 2}" y="${sy + rH + 20}" font-size="12" fill="#b45309" font-weight="bold" text-anchor="middle">🚪 3cm 大門 (扣除 3cm)</text>
+          <text x="${(gS + gE) / 2}" y="${sy + rH + 20}" font-size="12" fill="#b45309" font-weight="bold" text-anchor="middle">🚪 3cm 大門 (扣除3cm)</text>
           <line x1="${gE}" y1="${sy + rH}" x2="${sx + rW}" y2="${sy + rH}" stroke="#ef4444" stroke-width="6" stroke-linecap="round" />
         `;
         needed -= 3;
@@ -222,32 +239,76 @@ window.TIMSS_LABS['W06'] = {
 
     g.innerHTML = html;
 
-    // 文字提示
-    if (!isDeployed) {
-      info.style.background = '#f8fafc';
-      info.style.borderColor = '#cbd5e1';
-      info.style.color = '#475569';
-      info.innerHTML = `🌾 <strong>農場準備就緒：</strong>長 ${L} cm、寬 ${W} cm。請點擊上方按鈕<strong>「🧶 拉毛線繞一週圍籬笆」</strong>，觀測圍滿四周共需要多少毛線！`;
-    } else if (this.state.mode === 'full') {
-      info.style.background = '#ecfdf5';
-      info.style.borderColor = '#86efac';
-      info.style.color = '#065f46';
-      info.innerHTML = `🏞️ <strong>四面全圍籬笆：</strong>算式 <strong>(${L} + ${W}) × 2 ＝ ${full} cm</strong>。紅色毛線剛好完整繞滿四周！`;
-    } else if (this.state.mode === 'wall') {
-      info.style.background = '#eff6ff';
-      info.style.borderColor = '#bfdbfe';
-      info.style.color = '#1e40af';
-      info.innerHTML = `🧱 <strong>長邊改靠現成磚牆：</strong>算式 <strong>(${L} + ${W}) × 2 − ${L} (牆) ＝ ${needed} cm</strong>。頂部有一堵現成磚牆抵擋，這條邊<strong>不用圍籬笆</strong>，省下 ${L} cm 毛線！`;
-    } else if (this.state.mode === 'gate') {
-      info.style.background = '#fffbeb';
-      info.style.borderColor = '#fde68a';
-      info.style.color = '#92400e';
-      info.innerHTML = `🚪 <strong>底邊開闢 3cm 大門：</strong>算式 <strong>(${L} + ${W}) × 2 − 3 (門) ＝ ${needed} cm</strong>。出入口不能用籬笆封死，<strong>剪去 3cm 門寬</strong>，實用毛線只需 ${needed} cm！`;
-    } else if (this.state.mode === 'wall_gate') {
-      info.style.background = '#f5f3ff';
-      info.style.borderColor = '#ddd6fe';
-      info.style.color = '#6d28d9';
-      info.innerHTML = `⭐ <strong>靠牆 ＋ 留門雙重組合：</strong>算式 <strong>${full} − ${L} (牆) − 3 (門) ＝ ${needed} cm</strong>！同時扣減天然屏障與出入通道！`;
+    // 導引條更新
+    const guideTag = document.getElementById('w06-guide-tag');
+    const guideTitle = document.getElementById('w06-guide-title');
+    const guideText = document.getElementById('w06-guide-text');
+    const guideSub = document.getElementById('w06-guide-sub');
+    const btnDeploy = document.getElementById('w06-btn-deploy');
+
+    if (this.state.mission === 'full') {
+      guideTitle.innerText = '任務一：四面全圍籬笆';
+      if (btnDeploy) btnDeploy.innerText = '🧶 拉毛線繞一週圍籬笆';
+
+      if (!isDeployed) {
+        guideTag.className = 'guide-step-tag';
+        guideTag.innerText = '👨‍🏫 老師引導 ➔ 第 1 步 / 共 2 步';
+        guideText.innerHTML = `農場長 12cm、寬 8cm，四周尚未圍籬。請操作員點擊上方<strong>「🧶 拉毛線繞一週圍籬笆」</strong>，親自量出四面總長！`;
+        guideSub.innerText = '💡 目前尚未鋪設籬笆，等待學生操作。';
+      } else {
+        guideTag.className = 'guide-step-tag step-done';
+        guideTag.innerText = '🎉 探究結論 ➔ 四面封閉總周界';
+        guideText.innerHTML = `<strong>紅色毛線繞滿四周！</strong>算式是 <strong>(${L} ＋ ${W}) × 2 ＝ ${full} cm</strong>！圍滿這座農場正好需要 <strong>${full} cm</strong> 毛線！`;
+        guideSub.innerText = '🎯 教師金句：周界本是繞一週，四邊相加求總長！';
+      }
+
+    } else if (this.state.mission === 'wall') {
+      guideTitle.innerText = '任務二：長邊改靠現成磚牆';
+      if (btnDeploy) btnDeploy.innerText = '🧱 應用：長邊靠磚牆剪掉頂邊毛線';
+
+      if (!isDeployed) {
+        guideTag.className = 'guide-step-tag step-alert';
+        guideTag.innerText = '👨‍🏫 老師引導 ➔ 現成牆壁情境探究';
+        guideText.innerHTML = `如果農場長邊靠著一堵現成的紅磚牆。小明說：<strong>「頂部已經有牆了，還要圍籬笆嗎？」</strong>請操作員點擊上方<strong>「🧱 應用：長邊靠磚牆」</strong>！`;
+        guideSub.innerText = '💡 請全班猜測：毛線能省下多少？';
+      } else {
+        guideTag.className = 'guide-step-tag step-done';
+        guideTag.innerText = '🎉 探究結論 ➔ 靠牆省下一條長邊！';
+        guideText.innerHTML = `<strong>磚牆替換了頂邊！</strong>算式是 <strong>${full} − ${L} (牆) ＝ ${needed} cm</strong>！頂邊不需要圍籬笆，<strong>毛線只需 ${needed} cm，省下了整整 ${L} cm！</strong>`;
+        guideSub.innerText = '🎯 教師金句：現成磚牆當屏障，省下一條長邊長！';
+      }
+
+    } else if (this.state.mission === 'gate') {
+      guideTitle.innerText = '任務三：底邊開闢 3cm 大門';
+      if (btnDeploy) btnDeploy.innerText = '🚪 應用：底邊剪出 3cm 大門通道';
+
+      if (!isDeployed) {
+        guideTag.className = 'guide-step-tag step-alert';
+        guideTag.innerText = '👨‍🏫 老師引導 ➔ 大門進出情境探究';
+        guideText.innerHTML = `農場需要留一道 3cm 大門讓人進出，出入口不能用毛線封死！請操作員點擊上方<strong>「🚪 應用：底邊剪出 3cm 大門」</strong>！`;
+        guideSub.innerText = '💡 門是通道，不能被籬笆攔截。';
+      } else {
+        guideTag.className = 'guide-step-tag step-done';
+        guideTag.innerText = '🎉 探究結論 ➔ 留門扣除門寬！';
+        guideText.innerHTML = `<strong>底邊剪開了 3cm 通道！</strong>算式是 <strong>${full} − 3 (門) ＝ ${needed} cm</strong>！開闢大門只需扣除門的寬度，實用毛線只需 <strong>${needed} cm</strong>！`;
+        guideSub.innerText = '🎯 教師金句：留門剪出進出路，扣除通道實用長！';
+      }
+
+    } else if (this.state.mission === 'wall_gate') {
+      guideTitle.innerText = '任務四：靠牆 ＋ 留門雙重組合';
+      if (btnDeploy) btnDeploy.innerText = '⭐ 應用：靠牆又留門';
+
+      if (!isDeployed) {
+        guideTag.className = 'guide-step-tag step-alert';
+        guideTag.innerText = '👨‍🏫 老師引導 ➔ 綜合工程挑戰';
+        guideText.innerHTML = `如果農場頂部靠磚牆，底邊又留了 3cm 大門。該怎麼計算需要的毛線？請操作員點擊上方<strong>「⭐ 應用：靠牆又留門」</strong>！`;
+        guideSub.innerText = '💡 同時考慮天然屏障與出入通道。';
+      } else {
+        guideTag.className = 'guide-step-tag step-done';
+        guideTag.innerText = '🎉 探究結論 ➔ 雙重扣減模型';
+        guideText.innerHTML = `<strong>雙重扣減成功！</strong>算式是 <strong>${full} − ${L} (牆) − 3 (門) ＝ ${needed} cm</strong>！圍籬工程只需 <strong>${needed} cm</strong> 毛線！`;
+        guideSub.innerText = '🎯 教師金句：幾何結合真實生活，邊界條件決定算法！';
+      }
     }
 
     if (window.ipadApp) {

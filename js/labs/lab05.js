@@ -1,6 +1,6 @@
 /**
- * lab05.js - 第 5 週：【購物天平與代數天平】 (LAB-W05-N-MSTEP) - iPad 優化版 (動手拼擺守恆與括號對抗)
- * 數與運算 ｜ 應用 Applying ｜ 歸零天平、動手放鈔票筆記本、無括號翻倒 vs 括號保險箱平衡
+ * lab05.js - 第 5 週：【購物天平與代數天平】 (LAB-W05-N-MSTEP) - iPad 優化版
+ * 教師引導 ➔ 學生主動探究 ➔ 任務切換立即歸零待測
  */
 
 window.TIMSS_LABS = window.TIMSS_LABS || {};
@@ -16,11 +16,11 @@ window.TIMSS_LABS['W05'] = {
   activeRole: '🔴 操作員(D) 切換括號模式 ➔ 🟢 發言人(B) 解釋括號保險箱',
 
   state: {
-    stage: 'balance', // 'balance', 'algebra'
+    mission: 'balance', // 'balance', 'algebra'
     leftCash100: false,
     booksCount: 0,
     change55: false,
-    algebraMode: 'none' // 'none', 'paren', 'noparen'
+    algebraMode: 'none' // 'none', 'noparen', 'paren'
   },
 
   getTeacherSummary() {
@@ -34,7 +34,7 @@ window.TIMSS_LABS['W05'] = {
   render(container) {
     this.container = container;
     this.state = {
-      stage: 'balance',
+      mission: 'balance',
       leftCash100: false,
       booksCount: 0,
       change55: false,
@@ -42,15 +42,30 @@ window.TIMSS_LABS['W05'] = {
     };
 
     container.innerHTML = `
+      <!-- 任務切換列：點擊任何任務立即歸零 -->
       <div class="ipad-controls-bar">
         <div class="controls-left-group">
-          <button class="touch-btn primary" id="w05-tab-bal">🛍️ 階段一：動手拼擺購物天平</button>
-          <button class="touch-btn" id="w05-tab-alg">🔒 階段二：反求單價與括號對抗</button>
+          <button class="touch-btn primary" id="w05-tab-bal">🛍️ 任務一：動手拼擺購物守恆天平</button>
+          <button class="touch-btn" id="w05-tab-alg">🔒 任務二：反求單價與括號保險箱對抗</button>
         </div>
-        <button class="touch-btn" id="w05-btn-reset">🔄 天平歸零待測</button>
+        <button class="touch-btn" id="w05-btn-reset">🔄 當前任務歸零待測</button>
       </div>
 
-      <!-- 階段一操作面板：動手放置物品 -->
+      <!-- 👨‍🏫 教師引導與學生探究導引條 -->
+      <div class="teacher-guide-banner" id="w05-guide-banner">
+        <div class="guide-header-row">
+          <span class="guide-step-tag" id="w05-guide-tag">👨‍🏫 老師引導 ➔ 第 1 步 / 共 3 步</span>
+          <span class="guide-mission-title" id="w05-guide-title">任務一：動手拼擺購物守恆天平</span>
+        </div>
+        <div class="guide-instruction-text" id="w05-guide-text">
+          天平目前為 0 元空盤狀態。小明付了 $100 買文具。請操作員在<strong>【左盤】</strong>放上 <strong>$100 鈔票</strong>，觀察天平如何傾斜！
+        </div>
+        <div class="guide-hint-subtext" id="w05-guide-sub">
+          💡 請學生點擊下方按鈕放入 $100。
+        </div>
+      </div>
+
+      <!-- 任務一操作面板：動手放置物品 -->
       <div id="w05-panel-stage1" class="ipad-controls-bar" style="background:#f8fafc;">
         <div style="display:flex; align-items:center; gap:8px;">
           <strong style="color:#047857;">左盤：</strong>
@@ -70,9 +85,9 @@ window.TIMSS_LABS['W05'] = {
         </div>
       </div>
 
-      <!-- 階段二操作面板：括號算式對抗 -->
+      <!-- 任務二操作面板：括號算式對抗 -->
       <div id="w05-panel-stage2" class="ipad-controls-bar" style="background:#f8fafc; display:none;">
-        <span style="font-weight:bold; color:#334155;">反求每本筆記本單價（右盤為 1 本 $15）：</span>
+        <span style="font-weight:bold; color:#334155;">反求單價算式放入左盤（右盤為 1 本 $15）：</span>
         <div style="display:flex; gap:10px;">
           <button class="touch-btn danger" id="w05-btn-nopar">❌ 放上無括號算式：100 − 55 ÷ 3</button>
           <button class="touch-btn success" id="w05-btn-par">✅ 放上括號算式：(100 − 55) ÷ 3</button>
@@ -103,9 +118,6 @@ window.TIMSS_LABS['W05'] = {
           <g id="w05-right-g"></g>
         </svg>
       </div>
-
-      <!-- 說明與回饋橫幅 -->
-      <div id="w05-desc-box" style="margin-top:14px; background:#ecfdf5; border:1.5px solid #86efac; border-radius:10px; padding:12px 16px; font-size:0.95rem;"></div>
     `;
 
     this.bindEvents();
@@ -118,23 +130,45 @@ window.TIMSS_LABS['W05'] = {
       if (el) el.addEventListener('click', fn);
     };
 
-    // 切換階段
+    // 任務切換：一律歸零待測！
     bind('w05-tab-bal', () => {
-      this.state.stage = 'balance';
-      document.getElementById('w05-tab-bal').className = 'touch-btn primary';
-      document.getElementById('w05-tab-alg').className = 'touch-btn';
+      this.state = {
+        mission: 'balance',
+        leftCash100: false,
+        booksCount: 0,
+        change55: false,
+        algebraMode: 'none'
+      };
+      this.updateTabs('w05-tab-bal');
       document.getElementById('w05-panel-stage1').style.display = 'flex';
       document.getElementById('w05-panel-stage2').style.display = 'none';
+      this.resetButtonsUI();
       window.soundFx.click();
       this.update();
     });
 
     bind('w05-tab-alg', () => {
-      this.state.stage = 'algebra';
-      document.getElementById('w05-tab-alg').className = 'touch-btn primary';
-      document.getElementById('w05-tab-bal').className = 'touch-btn';
+      this.state = {
+        mission: 'algebra',
+        leftCash100: false,
+        booksCount: 0,
+        change55: false,
+        algebraMode: 'none'
+      };
+      this.updateTabs('w05-tab-alg');
       document.getElementById('w05-panel-stage1').style.display = 'none';
       document.getElementById('w05-panel-stage2').style.display = 'flex';
+      this.resetButtonsUI();
+      window.soundFx.click();
+      this.update();
+    });
+
+    bind('w05-btn-reset', () => {
+      this.state.leftCash100 = false;
+      this.state.booksCount = 0;
+      this.state.change55 = false;
+      this.state.algebraMode = 'none';
+      this.resetButtonsUI();
       window.soundFx.click();
       this.update();
     });
@@ -198,25 +232,28 @@ window.TIMSS_LABS['W05'] = {
       window.soundFx.balanceChime();
       this.update();
     });
+  },
 
-    // 重置
-    bind('w05-btn-reset', () => {
-      this.state.leftCash100 = false;
-      this.state.booksCount = 0;
-      this.state.change55 = false;
-      this.state.algebraMode = 'none';
-      const btn100 = document.getElementById('w05-btn-toggle-100');
-      if (btn100) {
-        btn100.classList.remove('primary');
-        btn100.innerText = '💵 放上 $100 鈔票';
+  resetButtonsUI() {
+    const btn100 = document.getElementById('w05-btn-toggle-100');
+    if (btn100) {
+      btn100.classList.remove('primary');
+      btn100.innerText = '💵 放上 $100 鈔票';
+    }
+    const btn55 = document.getElementById('w05-btn-toggle-55');
+    if (btn55) {
+      btn55.classList.remove('primary');
+      btn55.innerText = '🪙 放上 $55 零錢';
+    }
+  },
+
+  updateTabs(activeId) {
+    ['w05-tab-bal', 'w05-tab-alg'].forEach(id => {
+      const b = document.getElementById(id);
+      if (b) {
+        if (id === activeId) b.classList.add('primary');
+        else b.classList.remove('primary');
       }
-      const btn55 = document.getElementById('w05-btn-toggle-55');
-      if (btn55) {
-        btn55.classList.remove('primary');
-        btn55.innerText = '🪙 放上 $55 零錢';
-      }
-      window.soundFx.click();
-      this.update();
     });
   },
 
@@ -225,19 +262,22 @@ window.TIMSS_LABS['W05'] = {
     const needle = document.getElementById('w05-needle');
     const lG = document.getElementById('w05-left-g');
     const rG = document.getElementById('w05-right-g');
-    const desc = document.getElementById('w05-desc-box');
+    const guideTag = document.getElementById('w05-guide-tag');
+    const guideTitle = document.getElementById('w05-guide-title');
+    const guideText = document.getElementById('w05-guide-text');
+    const guideSub = document.getElementById('w05-guide-sub');
 
     document.getElementById('w05-b-val').innerText = this.state.booksCount;
 
-    if (this.state.stage === 'balance') {
+    if (this.state.mission === 'balance') {
+      guideTitle.innerText = '任務一：動手拼擺購物守恆天平';
+
       const leftVal = this.state.leftCash100 ? 100 : 0;
       const rightVal = this.state.booksCount * 15 + (this.state.change55 ? 55 : 0);
       const diff = rightVal - leftVal;
 
       let angle = 0;
-      if (diff !== 0) {
-        angle = Math.max(-15, Math.min(15, (diff / 30) * 8));
-      }
+      if (diff !== 0) angle = Math.max(-15, Math.min(15, (diff / 30) * 8));
       beam.setAttribute('transform', `rotate(${angle}, 340, 150)`);
 
       // 渲染左盤
@@ -269,35 +309,37 @@ window.TIMSS_LABS['W05'] = {
       }
       rG.innerHTML = rHTML;
 
-      // 判斷平衡與回饋
-      if (leftVal === 0 && rightVal === 0) {
+      // 步驟導引判斷
+      if (!this.state.leftCash100 && this.state.booksCount === 0 && !this.state.change55) {
         needle.style.stroke = '#64748b';
-        desc.style.background = '#f8fafc';
-        desc.style.borderColor = '#cbd5e1';
-        desc.style.color = '#475569';
-        desc.innerHTML = `⚖️ <strong>天平處於 0 元空盤狀態：</strong>請在左邊放上 $100 鈔票，並在右邊搭配筆記本與找回零錢，探索如何讓天平恢復平衡！`;
+        guideTag.className = 'guide-step-tag';
+        guideTag.innerText = '👨‍🏫 老師引導 ➔ 第 1 步 / 共 3 步';
+        guideText.innerHTML = `天平目前處於 0 元空盤狀態。小明買書付了 $100。請操作員在<strong>【左盤】</strong>放上 <strong>$100 鈔票</strong>，觀察天平如何傾斜！`;
+        guideSub.innerText = '💡 請點擊下方「💵 放上 $100 鈔票」。';
+      } else if (this.state.leftCash100 && this.state.booksCount < 3) {
+        needle.style.stroke = '#ef4444';
+        guideTag.className = 'guide-step-tag step-alert';
+        guideTag.innerText = '👨‍🏫 老師引導 ➔ 第 2 步 / 共 3 步';
+        guideText.innerHTML = `左盤被 $100 壓沉下去了！小明買了 <strong>3 本每本 $15 的筆記本</strong>。請操作員在<strong>【右盤】</strong>使用 ＋ 號放入 <strong>3 本筆記本</strong>！`;
+        guideSub.innerText = `💡 目前右盤已有 ${this.state.booksCount} 本 ($${this.state.booksCount * 15})，請加滿 3 本。`;
+      } else if (this.state.leftCash100 && this.state.booksCount >= 3 && !this.state.change55) {
+        needle.style.stroke = '#ef4444';
+        guideTag.className = 'guide-step-tag step-alert';
+        guideTag.innerText = '👨‍🏫 老師引導 ➔ 第 3 步 / 共 3 步';
+        guideText.innerHTML = `右盤 3 本書共 $45，天平依然偏向左盤！售貨員找回了 <strong>$55 零錢</strong>。請操作員在<strong>【右盤】</strong>放上 <strong>$55 零錢</strong>！`;
+        guideSub.innerText = '💡 請點擊下方「🪙 放上 $55 零錢」。';
       } else if (leftVal === rightVal && leftVal > 0) {
         needle.style.stroke = '#10b981';
-        desc.style.background = '#ecfdf5';
-        desc.style.borderColor = '#86efac';
-        desc.style.color = '#065f46';
-        desc.innerHTML = `🎉 <strong>購物守恆完全平衡！</strong>左盤付出 <strong>$100</strong> ＝ 右盤 <strong>3 本筆記本 (3×$15＝$45) ＋ 找回零錢 $55</strong>！兩邊總額完全相等！`;
-      } else if (leftVal > rightVal) {
-        needle.style.stroke = '#ef4444';
-        desc.style.background = '#eff6ff';
-        desc.style.borderColor = '#bfdbfe';
-        desc.style.color = '#1e40af';
-        desc.innerHTML = `🔵 <strong>左盤沉下去了！</strong>付出 $100 大於右盤現有物品總值（右盤共 $${rightVal}）。請在右盤增加筆記本或放上找回零錢！`;
-      } else {
-        needle.style.stroke = '#ef4444';
-        desc.style.background = '#fffbeb';
-        desc.style.borderColor = '#fde68a';
-        desc.style.color = '#92400e';
-        desc.innerHTML = `🟣 <strong>右盤沉下去了！</strong>右盤總值 $${rightVal} 超過了左盤 $${leftVal}。`;
+        guideTag.className = 'guide-step-tag step-done';
+        guideTag.innerText = '🎉 探究結論 ➔ 購物等量守恆完全平衡！';
+        guideText.innerHTML = `<strong>天平穩穩平衡！</strong>左盤付出 <strong>$100</strong> ＝ 右盤 <strong>3 本書花費 $45 ＋ 找回零錢 $55</strong>！兩邊總額完全守恆相等！`;
+        guideSub.innerText = '🎯 教師金句：付出總額等於花費加找零，等量守恆天平平！';
       }
 
     } else {
-      // 階段二：代數算式對抗
+      // 任務二：括號對抗
+      guideTitle.innerText = '任務二：反求單價與括號保險箱對決';
+
       if (this.state.algebraMode === 'none') {
         beam.setAttribute('transform', 'rotate(0, 340, 150)');
         needle.style.stroke = '#64748b';
@@ -306,10 +348,11 @@ window.TIMSS_LABS['W05'] = {
           <rect x="505" y="190" width="70" height="42" rx="5" fill="#3b82f6" stroke="#1d4ed8" stroke-width="2" />
           <text x="540" y="216" fill="white" font-size="13" font-weight="bold" text-anchor="middle">1 本 $15</text>
         `;
-        desc.style.background = '#eff6ff';
-        desc.style.borderColor = '#bfdbfe';
-        desc.style.color = '#1e40af';
-        desc.innerHTML = `🎯 <strong>探究任務：</strong>右盤是 1 本筆記本的單價 <strong>$15</strong>。請點擊上方按鈕，實測「無括號算式」與「有括號算式」放入左盤後，天平會發生甚麼！`;
+        guideTag.className = 'guide-step-tag';
+        guideTag.innerText = '👨‍🏫 老師引導 ➔ 第 1 步：挑戰漏寫括號';
+        guideText.innerHTML = `右盤是 1 本筆記本的真實單價 <strong>$15</strong>。小明反求單價時忘了加括號，寫成 <strong>100 − 55 ÷ 3</strong>。請操作員點擊下方<strong>「❌ 放上無括號算式」</strong>，看看天平會發生甚麼！`;
+        guideSub.innerText = '💡 請全班猜測：不加括號，天平能平衡嗎？';
+
       } else if (this.state.algebraMode === 'noparen') {
         beam.setAttribute('transform', 'rotate(-16, 340, 150)');
         needle.style.stroke = '#ef4444';
@@ -322,10 +365,11 @@ window.TIMSS_LABS['W05'] = {
           <rect x="505" y="215" width="70" height="42" rx="5" fill="#3b82f6" stroke="#1d4ed8" stroke-width="2" />
           <text x="540" y="241" fill="white" font-size="13" font-weight="bold" text-anchor="middle">1 本 $15</text>
         `;
-        desc.style.background = '#fef2f2';
-        desc.style.borderColor = '#fca5a5';
-        desc.style.color = '#991b1b';
-        desc.innerHTML = `💥 <strong>天平劇烈傾覆！漏寫括號大災難：</strong>若寫成 <strong>100 − 55 ÷ 3</strong>，四則運算規則強制「先乘除後加減」，先算 55 ÷ 3 ≈ 18.3，再算 100 − 18.3 ＝ <strong>81.7 元</strong>！左盤 81.7 元比右盤單價 15 元重得多，天平徹底崩塌！`;
+        guideTag.className = 'guide-step-tag step-alert';
+        guideTag.innerText = '💥 天平劇烈傾覆！';
+        guideText.innerHTML = `<strong>天平徹底崩潰！</strong>四則運算強制「先乘除後加減」，先算了 55 ÷ 3 ≈ 18.3，再算 100 − 18.3 ＝ <strong>81.7 元</strong>！左盤 81.7 元遠重於單價 15 元！請操作員點擊<strong>「✅ 放上括號算式」</strong>！`;
+        guideSub.innerText = '💡 請引導學生理解：為什麼會算出 81.7 這種荒唐數字？';
+
       } else if (this.state.algebraMode === 'paren') {
         beam.setAttribute('transform', 'rotate(0, 340, 150)');
         needle.style.stroke = '#10b981';
@@ -338,10 +382,10 @@ window.TIMSS_LABS['W05'] = {
           <rect x="505" y="190" width="70" height="42" rx="5" fill="#3b82f6" stroke="#1d4ed8" stroke-width="2" />
           <text x="540" y="216" fill="white" font-size="13" font-weight="bold" text-anchor="middle">1 本 $15</text>
         `;
-        desc.style.background = '#ecfdf5';
-        desc.style.borderColor = '#86efac';
-        desc.style.color = '#065f46';
-        desc.innerHTML = `🔒 <strong>括號保險箱立大功：</strong>加上括號 <strong>(100 − 55) ÷ 3</strong>，保險箱強制先算減法（先求 3 本總花費 $45），再除以 3 得出單價 <strong>$15</strong>！天平穩如泰山！`;
+        guideTag.className = 'guide-step-tag step-done';
+        guideTag.innerText = '🎉 探究結論 ➔ 括號保險箱立大功！';
+        guideText.innerHTML = `<strong>天平穩如泰山！</strong>加上括號 <strong>(100 − 55) ÷ 3</strong>，保險箱強制先算減法（求 3 本總價 $45），再除以 3 得出單價 <strong>$15</strong>！天平完美平衡！`;
+        guideSub.innerText = '🎯 教師金句：小括號是保險箱，先減後除不走樣！';
       }
     }
 
